@@ -9,7 +9,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{A51F5B48-FED3-6300-44A1-D3B2B7D5E9B1}</ProjectGuid>
+    <ProjectGuid>{A7F092E3-6C57-0A78-BB92-7B02942B9564}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp-Editor-firstpass</AssemblyName>
@@ -53,7 +53,7 @@
      <Compile Include="Assets\Standard Assets\Editor\Water\Water4\WaterBaseEditor.cs" />
      <Compile Include="Assets\Standard Assets\Editor\Water\Water4\WaterEditorUtility.cs" />
  <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>/home/sanji/projets/Boat2/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+ <HintPath>/home/sanji/projets/boat_simulator/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>/home/sanji/unity/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -292,6 +292,9 @@
  <Reference Include="UnityEditor.LinuxStandalone.Extensions">
  <HintPath>/home/sanji/unity/Editor/Data/PlaybackEngines/LinuxStandaloneSupport/UnityEditor.LinuxStandalone.Extensions.dll</HintPath>
  </Reference>
+ <Reference Include="ArchimedsLab">
+ <HintPath>/home/sanji/projets/boat_simulator/Assets/FloatingEntities/Scripts/ArchimedsLab.dll</HintPath>
+ </Reference>
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>/home/sanji/.config/unity3d/cache/packages/packages.unity.com/com.unity.ads@2.0.3/UnityEngine.Advertisements.dll</HintPath>
  </Reference>
@@ -312,9 +315,6 @@
  </Reference>
  <Reference Include="UnityEngine.StandardEvents">
  <HintPath>/home/sanji/.config/unity3d/cache/packages/packages.unity.com/com.unity.standardevents@1.0.10/UnityEngine.StandardEvents.dll</HintPath>
- </Reference>
- <Reference Include="ArchimedsLab">
- <HintPath>/home/sanji/projets/Boat2/Assets/FloatingEntities/Scripts/ArchimedsLab.dll</HintPath>
  </Reference>
  <Reference Include="mscorlib">
  <HintPath>/home/sanji/unity/Editor/Data/MonoBleedingEdge/lib/mono/2.0-api/mscorlib.dll</HintPath>
@@ -346,7 +346,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{2137E593-1F2E-A6F7-2113-45822CC856A1}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{1A25B9A6-3A7E-09A1-41E2-C04B35D4236A}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
