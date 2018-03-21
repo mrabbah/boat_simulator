@@ -46,6 +46,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\FloatingEntities\Scripts\AdvancedBoatController.cs" />
+     <Compile Include="Assets\FloatingEntities\Scripts\AdvancedPropellerBoats.cs" />
      <Compile Include="Assets\FloatingEntities\Scripts\BoatController.cs" />
      <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\FloatingGameEntityFlat.cs" />
      <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\FloatingGameEntityRealist.cs" />
@@ -65,6 +67,10 @@
      <Compile Include="Assets\SampleScenes\Scripts\ParticleSceneControls.cs" />
      <Compile Include="Assets\SampleScenes\Scripts\PlaceTargetWithMouse.cs" />
      <Compile Include="Assets\SampleScenes\Scripts\SlowMoButton.cs" />
+     <Compile Include="Assets\Scritps\BoatSim.cs" />
+     <Compile Include="Assets\Scritps\DrawArrow.cs" />
+     <Compile Include="Assets\Scritps\ExtendedFlycam.cs" />
+     <Compile Include="Assets\Scritps\ThirdPersonCamera.cs" />
      <None Include="Assets\FloatingEntities\Shaders\OceanAdvanced.shader" />
      <None Include="Assets\FloatingEntities\Shaders\WaterToolBox.cginc" />
      <None Include="Assets\FloatingEntities\Shaders\Ocean.shader" />

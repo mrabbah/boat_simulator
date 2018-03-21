@@ -1,5 +1,17 @@
 ﻿<Properties StartupConfiguration="{A7F092E3-6C57-0A78-BB92-7B02942B9564}|Unit Tests">
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scritps/ExtendedFlycam.cs">
+    <Files>
+      <File FileName="Assets/Scritps/ThirdPersonCamera.cs" Line="16" Column="60" />
+      <File FileName="Assets/FloatingEntities/Scripts/AdvancedPropellerBoats.cs" Line="2" Column="1" />
+      <File FileName="Assets/Scritps/BoatSim.cs" Line="141" Column="18" />
+      <File FileName="Assets/Scritps/DrawArrow.cs" Line="29" Column="9" />
+      <File FileName="Assets/FloatingEntities/Scripts/BoatController.cs" Line="51" Column="4" />
+      <File FileName="Assets/FloatingEntities/Scripts/OceanAdvanced.cs" Line="28" Column="24" />
+      <File FileName="Assets/FloatingEntities/Scripts/GameEntity/GameEntity.cs" Line="1" Column="1" />
+      <File FileName="Assets/FloatingEntities/Scripts/GameEntity/FloatingGameEntityRealist.cs" Line="23" Column="26" />
+      <File FileName="Assets/Scritps/ExtendedFlycam.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
