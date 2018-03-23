@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Ocean/Scene/Ocean_with_rc_boat_island.unity
+- path: Assets/Ocean/Scene/Ocean_with_rc_boat_island_02.unity
   isLoaded: 1
   isActive: 1

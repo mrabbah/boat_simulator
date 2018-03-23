@@ -18,7 +18,7 @@ public class ThirdPersonCamera : MonoBehaviour {
 	
 	
 	void LateUpdate () {
-        if(follow.position.y + 2 > 0) {
+        if(follow.position.y + 12 > 0) {
             targetPosition = follow.position + follow.up * distanceUp - follow.forward * distanceAway;
             transform.position = Vector3.Lerp(transform.position, targetPosition, smooth * Time.deltaTime);
 

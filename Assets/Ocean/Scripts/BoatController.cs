@@ -25,6 +25,8 @@ public class BoatController : MonoBehaviour{
 	private float accel=0;
 	private float accelBreak;
 
+    public Transform rudder;
+
 
 
      void Start()  {
@@ -87,7 +89,9 @@ public class BoatController : MonoBehaviour{
 			m_horizontalInput * m_turningFactor,
 			m_horizontalInput * -m_turningTorqueFactor
         );
-
+        if(rudder != null) {
+            rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
+        }
         if(m_motors.Count > 0) {
 
             float motorRotationAngle = 0F;
