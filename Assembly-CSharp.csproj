@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Temp\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_1_0;UNITY_2018_1;UNITY_2018;PLATFORM_ARCH_64;UNITY_64;UNITY_ANALYTICS;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_SPRITERENDERER_FLIPPING;ENABLE_SPRITES;ENABLE_GRID;ENABLE_TILEMAP;ENABLE_TERRAIN;ENABLE_RAKNET;ENABLE_DIRECTOR;ENABLE_UNET;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_CLOUD_SERVICES_COLLAB;ENABLE_CLOUD_SERVICES_COLLAB_SOFTLOCKS;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_HUB;ENABLE_CLOUD_PROJECT_ID;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_TIMELINE;ENABLE_EDITOR_METRICS;ENABLE_EDITOR_METRICS_CACHING;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;INCLUDE_DYNAMIC_GI;INCLUDE_GI;ENABLE_MONO_BDWGC;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;INCLUDE_PUBNUB;ENABLE_PLAYMODE_TESTS_RUNNER;ENABLE_VIDEO;ENABLE_PACKMAN;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_LOCALIZATION;PLATFORM_STANDALONE_LINUX;PLATFORM_STANDALONE;UNITY_STANDALONE_LINUX;UNITY_STANDALONE;UNITY_STANDALONE_LINUX_API;ENABLE_SUBSTANCE;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_UNITYWEBREQUEST;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLUSTERINPUT;ENABLE_VR;ENABLE_SPATIALTRACKING;ENABLE_MODULAR_UNITYENGINE_ASSEMBLIES;ENABLE_WEBSOCKET_HOST;ENABLE_MONO;NET_2_0_SUBSET;ENABLE_PROFILER;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_LINUX;ENABLE_UNITY_COLLECTIONS_CHECKS;UNITY_TEAM_LICENSE;UNITY_POST_PROCESSING_STACK_V2;CROSS_PLATFORM_INPUT</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_1_0;UNITY_2018_1;UNITY_2018;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_SPRITERENDERER_FLIPPING;ENABLE_SPRITES;ENABLE_GRID;ENABLE_TILEMAP;ENABLE_TERRAIN;ENABLE_RAKNET;ENABLE_DIRECTOR;ENABLE_UNET;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_CLOUD_SERVICES_COLLAB;ENABLE_CLOUD_SERVICES_COLLAB_SOFTLOCKS;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_HUB;ENABLE_CLOUD_PROJECT_ID;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_TIMELINE;ENABLE_EDITOR_METRICS;ENABLE_EDITOR_METRICS_CACHING;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;INCLUDE_DYNAMIC_GI;INCLUDE_GI;ENABLE_MONO_BDWGC;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;INCLUDE_PUBNUB;ENABLE_PLAYMODE_TESTS_RUNNER;ENABLE_VIDEO;ENABLE_PACKMAN;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_LOCALIZATION;PLATFORM_STANDALONE_LINUX;PLATFORM_STANDALONE;UNITY_STANDALONE_LINUX;UNITY_STANDALONE;UNITY_STANDALONE_LINUX_API;ENABLE_SUBSTANCE;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_UNITYWEBREQUEST;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLUSTERINPUT;ENABLE_VR;ENABLE_SPATIALTRACKING;ENABLE_MODULAR_UNITYENGINE_ASSEMBLIES;ENABLE_WEBSOCKET_HOST;ENABLE_MONO;NET_2_0_SUBSET;ENABLE_PROFILER;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_LINUX;ENABLE_UNITY_COLLECTIONS_CHECKS;UNITY_TEAM_LICENSE;NATIVE;THREADS;SIMD</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0169</NoWarn>
@@ -46,35 +46,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\FloatingEntities\Scripts\AdvancedBoatController.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\AdvancedPropellerBoats.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\BoatController.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\FloatingGameEntityFlat.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\FloatingGameEntityRealist.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\FloatingGameEntityStorm.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\GameEntity\GameEntity.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\OceanAdvanced.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\Orbital.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\PropellerBoats.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\SplashGenerator.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\Tools\Proxies.cs" />
-     <Compile Include="Assets\FloatingEntities\Scripts\WakeGenerator.cs" />
-     <Compile Include="Assets\SampleScenes\Menu\Scripts\MenuSceneLoader.cs" />
-     <Compile Include="Assets\SampleScenes\Menu\Scripts\PauseMenu.cs" />
-     <Compile Include="Assets\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />
-     <Compile Include="Assets\SampleScenes\Scripts\CameraSwitch.cs" />
-     <Compile Include="Assets\SampleScenes\Scripts\LevelReset.cs" />
-     <Compile Include="Assets\SampleScenes\Scripts\ParticleSceneControls.cs" />
-     <Compile Include="Assets\SampleScenes\Scripts\PlaceTargetWithMouse.cs" />
-     <Compile Include="Assets\SampleScenes\Scripts\SlowMoButton.cs" />
-     <Compile Include="Assets\Scritps\BoatSim.cs" />
-     <Compile Include="Assets\Scritps\DrawArrow.cs" />
-     <Compile Include="Assets\Scritps\ExtendedFlycam.cs" />
-     <Compile Include="Assets\Scritps\ThirdPersonCamera.cs" />
-     <None Include="Assets\FloatingEntities\Shaders\OceanAdvanced.shader" />
-     <None Include="Assets\FloatingEntities\Shaders\WaterToolBox.cginc" />
-     <None Include="Assets\FloatingEntities\Shaders\Ocean.shader" />
-     <None Include="Assets\SampleScenes\Shaders\Skybox-Procedural.shader" />
+     <Compile Include="Assets\Ocean\Plugins\Exocortex_FFT\ComplexF.cs" />
+     <Compile Include="Assets\Ocean\Plugins\Exocortex_FFT\Fourier.cs" />
+     <Compile Include="Assets\Ocean\Plugins\Exocortex_FFT\Fourier2.cs" />
+     <Compile Include="Assets\Ocean\Plugins\Exocortex_FFT\FourierDirection.cs" />
+     <Compile Include="Assets\Ocean\Plugins\uocean.cs" />
+     <Compile Include="Assets\Ocean\Scripts\BoatController.cs" />
+     <Compile Include="Assets\Ocean\Scripts\Boyant.cs" />
+     <Compile Include="Assets\Ocean\Scripts\Buoyancy.cs" />
+     <Compile Include="Assets\Ocean\Scripts\DestroyTimed.cs" />
+     <Compile Include="Assets\Ocean\Scripts\Ocean.cs" />
+     <Compile Include="Assets\Ocean\Scripts\presetLoader.cs" />
+     <Compile Include="Assets\Ocean\Scripts\SmoothFollow.cs" />
+     <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
+     <None Include="Assets\Ocean\Shaders\Ocean.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL4.shader" />
+     <None Include="Assets\Ocean\Shaders\DepthMask.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL8.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL7.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL2.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL5.shader" />
+     <None Include="Assets\Ocean\Plugins\kissfft.license.txt" />
+     <None Include="Assets\Ocean\Shaders\OceanL1.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL3.shader" />
+     <None Include="Assets\Ocean\Shaders\OceanL6.shader" />
  <Reference Include="Unity.PackageManagerUI.Editor">
  <HintPath>/home/sanji/projets/boat_simulator/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
@@ -273,8 +268,8 @@
  <Reference Include="UnityEngine.SpatialTracking">
  <HintPath>/home/sanji/unity/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
  </Reference>
- <Reference Include="ArchimedsLab">
- <HintPath>/home/sanji/projets/boat_simulator/Assets/FloatingEntities/Scripts/ArchimedsLab.dll</HintPath>
+ <Reference Include="Mono.Simd">
+ <HintPath>/home/sanji/projets/boat_simulator/Assets/Ocean/Plugins/Mono.Simd.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>/home/sanji/.config/unity3d/cache/packages/packages.unity.com/com.unity.ads@2.0.3/UnityEngine.Advertisements.dll</HintPath>
@@ -315,10 +310,6 @@
  <Reference Include="Boo.Lang">
  <HintPath>/home/sanji/unity/Editor/Data/MonoBleedingEdge/lib/mono/unity/Boo.Lang.dll</HintPath>
  </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{1A25B9A6-3A7E-09A1-41E2-C04B35D4236A}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
