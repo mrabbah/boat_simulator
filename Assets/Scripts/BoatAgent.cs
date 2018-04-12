@@ -28,15 +28,15 @@ public class BoatAgent : Agent
 
     public Transform rudder;
     public Transform target;
-    private Transform startState;
-    private float DIS_EPSILON = 0.1F;
+    private Vector3 startPosition;
+    private float DIS_EPSILON = 20F;
 
 
     void Start()
     {
         // base.Start();
         m_rigidbody = GetComponent<Rigidbody>();
-        startState = transform;
+        startPosition = transform.position;
         // m_rigidbody.drag = 1;
         //  m_rigidbody.angularDrag = 1;
         accelBreak = m_FinalSpeed * 0.3f;
@@ -150,7 +150,7 @@ public class BoatAgent : Agent
             }
         }
 
-        Debug.Log("Distance to target = " + dist.ToString());
+        //Debug.Log("Distance to target = " + dist.ToString());
         if (dist < DIS_EPSILON)
         {
             done = true;
@@ -160,11 +160,11 @@ public class BoatAgent : Agent
 
     public override void AgentReset()
     {
-        //m_rigidbody.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+        m_rigidbody.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
 
         m_rigidbody.velocity = new Vector3(0f, 0f, 0f);
-        transform.position = startState.position;
-        transform.rotation = startState.rotation;
+        transform.position = startPosition;
+        //transform.rotation = startState.rotation;
     }
 
     public override void AgentOnDone()
