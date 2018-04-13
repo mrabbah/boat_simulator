@@ -2,3 +2,7 @@
 Assets/ML-Agents
 Library
 
+*.pyc
+python/.DS_Store
+Assets/.DS_Store
+Assets/models/.DS_Store

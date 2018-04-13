@@ -1,0 +1,26 @@
+4/13/2018 2:54:24 AM
+ 
+Warning
+Attempt to set pitch to infinite value from script ignored!
+UnityEngine.AudioSource:set_pitch(AudioSource, Single)
+BoatAgent:AgentStep(Single[]) (at /Users/rabbah/projects/boat_simulator/Assets/Scripts/BoatAgent.cs:135)
+Agent:Step() (at /Users/rabbah/projects/boat_simulator/Assets/ML-Agents/Scripts/Agent.cs:229)
+Brain:Step() (at /Users/rabbah/projects/boat_simulator/Assets/ML-Agents/Scripts/Brain.cs:344)
+Academy:RunMdp() (at /Users/rabbah/projects/boat_simulator/Assets/ML-Agents/Scripts/Academy.cs:351)
+Academy:FixedUpdate() (at /Users/rabbah/projects/boat_simulator/Assets/ML-Agents/Scripts/Academy.cs:259)
+
+Error
+Infinity or NaN floating point numbers appear when calculating the transform matrix for a Collider. Scene hierarchy path "RCBOAT/Rudder"
+
+Error
+Screen position out of view frustum (screen pos 0.000000, 0.000000, 1000.000000) (Camera rect 0 0 80 80)
+
+Error
+Screen position out of view frustum (screen pos 80.000000, 0.000000, 1000.000000) (Camera rect 0 0 80 80)
+
+Error
+Screen position out of view frustum (screen pos 0.000000, 0.000000, 1000.000000) (Camera rect 0 0 80 80)
+
+Error
+Screen position out of view frustum (screen pos 80.000000, 0.000000, 1000.000000) (Camera rect 0 0 80 80)
+
