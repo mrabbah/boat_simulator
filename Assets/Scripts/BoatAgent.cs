@@ -71,8 +71,12 @@ public class BoatAgent : Agent
         if (brain.brainParameters.actionSpaceType == StateType.continuous)
         {
             m_verticalInput = act[0];
+            m_verticalInput = Mathf.Clamp(m_verticalInput, -1f, 1f);
             m_horizontalInput = act[1];
+            m_horizontalInput = Mathf.Clamp(m_horizontalInput, -1f, 1f);
 
+            Debug.Log("vertical input = " + m_verticalInput.ToString() + " horizontal input = " + m_horizontalInput.ToString());
+                 
             if (m_verticalInput > 0)
             {
                 if (accel < m_FinalSpeed) { accel += (m_FinalSpeed * m_InertiaFactor); accel *= m_verticalInput; }
@@ -94,10 +98,10 @@ public class BoatAgent : Agent
                 m_horizontalInput * m_turningFactor,
                 m_horizontalInput * -m_turningTorqueFactor
             );
-            if (rudder != null)
+            /*if (rudder != null)
             {
                 rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
-            }
+            }*/
             if (m_motors.Count > 0)
             {
 
@@ -121,7 +125,7 @@ public class BoatAgent : Agent
                 }
             }
 
-            if (m_enableAudio && m_boatAudioSource != null)
+            /*if (m_enableAudio && m_boatAudioSource != null)
             {
 
                 float pitchLevel = m_boatAudioMaxPitch * Mathf.Abs(m_verticalInput);
@@ -133,29 +137,26 @@ public class BoatAgent : Agent
                 float smoothPitchLevel = Lerp(m_boatAudioSource.pitch, pitchLevel, Time.deltaTime * 0.5f);
 
                 m_boatAudioSource.pitch = smoothPitchLevel;
-            }
+            }*/
             
-            if (done == false)
+            if (done == false && Mathf.Abs(dist) > 0)
             {
-                reward = 1f / dist;
+                reward = 1f / Mathf.Abs(dist);
             }
         }
         else
         {
-            int action = (int)act[0];
-           
-            if (done == false)
-            {
-                reward = 1f / dist;
-            }
+            Debug.LogError("Only Continuous scenario is allowed");
+            return;
         }
 
         //Debug.Log("Distance to target = " + dist.ToString());
-        if (dist < DIS_EPSILON)
+        if (Mathf.Abs(dist) < DIS_EPSILON)
         {
             done = true;
             reward = 1f;
         }
+        Debug.Log("reward = " + reward.ToString());
     }
 
     public override void AgentReset()
