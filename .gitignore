@@ -6,3 +6,5 @@ Library
 python/.DS_Store
 Assets/.DS_Store
 Assets/models/.DS_Store
+*.log
+python/unity-environment.log
