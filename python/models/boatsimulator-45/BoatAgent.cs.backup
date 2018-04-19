@@ -1,0 +1,283 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BoatAgent : Agent
+{
+
+    [SerializeField] private List<GameObject> m_motors;
+
+    [SerializeField] private bool m_enableAudio = true;
+    [SerializeField] private AudioSource m_boatAudioSource;
+    [SerializeField] private float m_boatAudioMinPitch = 0.4F;
+    [SerializeField] private float m_boatAudioMaxPitch = 1.2F;
+
+    [SerializeField] public float m_FinalSpeed = 100F;
+    [SerializeField] public float m_InertiaFactor = 0.005F;
+    [SerializeField] public float m_turningFactor = 2.0F;
+    [SerializeField] public float m_accelerationTorqueFactor = 35F;
+    [SerializeField] public float m_turningTorqueFactor = 35F;
+
+    private float m_verticalInput = 0F;
+    private float m_horizontalInput = 0F;
+    private Rigidbody m_rigidbody;
+    private Vector2 m_androidInputInit;
+
+    private float accel = 0;
+    private float accelBreak;
+
+    public Transform rudder;
+    public Transform target;
+    private Vector3 startPosition;
+    private float DIS_EPSILON = 20F;
+
+    private float initial_distance;
+
+    private float dist;
+
+    private float angle;
+    private Vector3 targetDir;
+
+    void Start()
+    {
+        // base.Start();
+        m_rigidbody = GetComponent<Rigidbody>();
+        startPosition = transform.position;
+        // m_rigidbody.drag = 1;
+        //  m_rigidbody.angularDrag = 1;
+        accelBreak = m_FinalSpeed * 0.3f;
+        dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
+
+        targetDir = target.position - transform.position;
+        angle = Vector3.Angle(targetDir, transform.forward);
+        initial_distance = dist;
+    }
+
+
+    public override List<float> CollectState()
+    {
+        List<float> state = new List<float>();
+
+        float normalized_x = (target.transform.position.x - transform.position.x) / (target.transform.position.x - startPosition.x);
+        float normalized_z = (target.transform.position.z - transform.position.z) / (target.transform.position.z - startPosition.z);
+        //float normalized_y = (target.transform.position.y - transform.position.y) / (target.transform.position.y - startPosition.y);
+
+        //Debug.Log("normalized coordinate : ( " + normalized_x +" , " + normalized_z + " , " + normalized_y + ")");
+        //state.Add(normalized_x);
+        //state.Add(normalized_z);
+        //state.Add(normalized_y);
+
+        //float normalized_rotation_x = transform.rotation.eulerAngles.x / 360;
+        //float normalized_rotation_z = transform.rotation.eulerAngles.z / 360;
+        //float normalized_rotation_y = transform.rotation.eulerAngles.y / 360;
+
+        float normalized_rotation_x = (transform.rotation.x % 360);// 360;
+        float normalized_rotation_z = (transform.rotation.z % 360);// 360;
+        float normalized_rotation_y = (transform.rotation.y % 360);// 360;
+
+        //Debug.Log("Rotation : ( " + normalized_rotation_x + " , " + normalized_rotation_z + " , " + normalized_rotation_y + ")");
+        state.Add(normalized_rotation_x);
+        state.Add(normalized_rotation_z);
+        //state.Add(normalized_rotation_y);
+
+        //finalspeed = 6 if any relation with this
+        float normalized_velocity_x = m_rigidbody.velocity.x ;// 20f;
+        float normalized_velocity_z = m_rigidbody.velocity.z ;// 20f;
+        float normalized_velocity_y = m_rigidbody.velocity.y ;// 20f;
+
+        //Debug.Log("Velocity : ( " + normalized_velocity_x + " , " + normalized_velocity_z + " , " + normalized_velocity_y + ")");
+        state.Add(normalized_velocity_x);
+        state.Add(normalized_velocity_z);
+        //state.Add(normalized_velocity_y);
+
+        dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
+        state.Add(dist);
+        angle = Vector3.Angle(targetDir, transform.forward);
+        state.Add(angle);
+
+        return state;
+    }
+
+    public override void AgentStep(float[] act)
+    {
+
+        reward = -0.001f;
+        
+        if (brain.brainParameters.actionSpaceType == StateType.continuous)
+        {
+            m_verticalInput = act[0];
+            //Debug.Log("vertical input = " + m_verticalInput.ToString());
+            m_verticalInput = Mathf.Clamp(m_verticalInput, -1f, 1f);
+            m_horizontalInput = act[1];
+            //Debug.Log("Horizontal input = " + m_horizontalInput.ToString());
+            m_horizontalInput = Mathf.Clamp(m_horizontalInput, -1f, 1f) ;
+            //m_horizontalInput = 0f;
+            //Debug.Log("vertical input = " + m_verticalInput.ToString() + " horizontal input = " + m_horizontalInput.ToString());
+                 
+            if (m_verticalInput > 0)
+            {
+                if (accel < m_FinalSpeed) { accel += (m_FinalSpeed * m_InertiaFactor); accel *= m_verticalInput; }
+            }
+            else if (m_verticalInput == 0)
+            {
+                if (accel > 0) { accel -= m_FinalSpeed * m_InertiaFactor; }
+                if (accel < 0) { accel += m_FinalSpeed * m_InertiaFactor; }
+            }
+            else if (m_verticalInput < 0)
+            {
+                if (accel > -accelBreak) { accel -= m_FinalSpeed * m_InertiaFactor * 2; }
+            }
+            //Debug.Log("Accel : " + accel);
+            m_rigidbody.AddRelativeForce(Vector3.forward * accel);
+
+            m_rigidbody.AddRelativeTorque(
+                m_verticalInput * -m_accelerationTorqueFactor,
+                m_horizontalInput * m_turningFactor,
+                m_horizontalInput * -m_turningTorqueFactor
+            );
+            /*if (rudder != null)
+            {
+                rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
+            }*/
+            if (m_motors.Count > 0)
+            {
+
+                float motorRotationAngle = 0F;
+                float motorMaxRotationAngle = 70;
+
+                motorRotationAngle = -m_horizontalInput * motorMaxRotationAngle;
+
+                for (int i = 0; i < m_motors.Count; i++)
+                {
+                    float currentAngleY = m_motors[i].transform.localEulerAngles.y;
+                    if (currentAngleY > 180.0f)
+                        currentAngleY -= 360.0f;
+
+                    float localEulerAngleY = Lerp(currentAngleY, motorRotationAngle, Time.deltaTime * 10);
+                    m_motors[i].transform.localEulerAngles = new Vector3(
+                        m_motors[i].transform.localEulerAngles.x,
+                        localEulerAngleY,
+                        m_motors[i].transform.localEulerAngles.z
+                    );
+                }
+            }
+
+            /*if (m_enableAudio && m_boatAudioSource != null)
+            {
+
+                float pitchLevel = m_boatAudioMaxPitch * Mathf.Abs(m_verticalInput);
+                if (m_verticalInput < 0) pitchLevel *= 0.7f;
+
+                if (pitchLevel < m_boatAudioMinPitch) pitchLevel = m_boatAudioMinPitch;
+
+
+                float smoothPitchLevel = Lerp(m_boatAudioSource.pitch, pitchLevel, Time.deltaTime * 0.5f);
+
+                m_boatAudioSource.pitch = smoothPitchLevel;
+            }*/
+
+           
+            dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
+            targetDir = target.position - transform.position;
+            angle = Vector3.Angle(targetDir, transform.forward);
+            //Debug.Log("angle = " + angle);
+            if(done == false) 
+            {
+                Debug.Log("dist = " + dist + " vi = " + m_verticalInput + " hi = " + m_horizontalInput  + " y = " + transform.position.y + " ang = " + angle + " rot z = " + Mathf.Abs(transform.rotation.z % 360) + " rot x = " + Mathf.Abs(transform.rotation.x % 360));
+                Debug.Log("init dist = " + initial_distance);
+                /*if(dist < (last_dist - 1)) {
+                    reward += 0.1f;
+                }
+                if (dist < last_dist)
+                {
+                    reward += 0.1f;
+                }*/
+                float dist_vect= (initial_distance - dist) / initial_distance;
+                if(dist_vect > 0) {
+                    reward += 0.5f;
+                    initial_distance = dist;
+                } else {
+                    reward -= 0.05f;
+                }
+
+                /*if(angle > 30f) {
+                    reward -= 0.05f;
+                } */
+
+                if(m_verticalInput > 0) {
+                    reward += 0.1f;
+                }
+                if (angle <= 30f) {
+                    reward += 0.1f;
+                } else {
+                    reward -= 0.05f;
+                }
+                    
+                if(m_verticalInput > 0 && angle <= 30) {
+                    reward += 0.4f;
+                }
+                if(Mathf.Abs(transform.rotation.z % 360) > 20f) 
+                {
+                    reward -= 0.05f;
+                }
+                if (Mathf.Abs(transform.rotation.x % 360) > 70f)
+                {
+                    reward -= 0.05f;
+                }
+
+
+                if (Mathf.Abs(transform.rotation.z % 360) > 90f || Mathf.Abs(transform.rotation.x % 360) > 90f)
+                {
+                    done = true;
+                    //reward = -1f;
+                }
+
+                /*if(Mathf.Abs(transform.position.y) > 10f) {
+                    reward = -0.5f;
+                }*/
+
+            }
+            /*if (done == false && dist > 0)
+            {
+                
+                reward = (1f / dist) - (angle / 180);
+            }*/
+        }
+        else
+        {
+            Debug.LogError("Only Continuous scenario is allowed");
+            return;
+        }
+
+        //Debug.Log("Distance to target = " + dist.ToString());
+        //Debug.Log("Last Distance to target = " + last_dist.ToString());
+        //Debug.Log("Angle between the target and the boat = " + angle.ToString());
+        if (dist < DIS_EPSILON)
+        {
+            done = true;
+            reward = 1f;
+        }
+        Debug.Log("reward = " + reward.ToString());
+    }
+
+    public override void AgentReset()
+    {
+        m_rigidbody.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+
+        m_rigidbody.velocity = new Vector3(0f, 0f, 0f);
+        transform.position = startPosition;
+        //transform.rotation = startState.rotation;
+    }
+    /*
+    public override void AgentOnDone()
+    {
+
+    }*/
+
+    static float Lerp(float from, float to, float value)
+    {
+        if (value < 0.0f) return from;
+        else if (value > 1.0f) return to;
+        return (to - from) * value + from;
+    }
+}
