@@ -1,0 +1,20 @@
+﻿<Properties StartupConfiguration="{D69C70C2-32D2-D488-FBF8-407715C12734}|">
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="Unity.Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BoatAgent.cs">
+    <Files>
+      <File FileName="Assets/Scripts/BoatAcademy.cs" Line="15" Column="6" />
+      <File FileName="Assets/ML-Agents/Examples/Basic/Scripts/BasicAcademy.cs" Line="15" Column="6" />
+      <File FileName="Assets/Scripts/BoatDecision.cs" Line="3" Column="1" />
+      <File FileName="Assets/ML-Agents/Examples/Basic/Scripts/BasicAgent.cs" Line="40" Column="24" />
+      <File FileName="Assets/Scripts/BoatAgent.cs" Line="65" Column="63" />
+      <File FileName="Assets/ML-Agents/Examples/3DBall/Scripts/Ball3DAcademy.cs" Line="1" Column="1" />
+      <File FileName="Assets/ML-Agents/Examples/3DBall/Scripts/Ball3DAgent.cs" Line="41" Column="23" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>

@@ -7,12 +7,10 @@ public class BoatAcademy : Academy {
     public override void AcademyReset()
     {
 
-
     }
 
     public override void AcademyStep()
     {
-
 
     }
 

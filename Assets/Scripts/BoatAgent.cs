@@ -17,11 +17,14 @@ public class BoatAgent : Agent
     [SerializeField] public float m_turningFactor = 2.0F;
     [SerializeField] public float m_accelerationTorqueFactor = 35F;
     [SerializeField] public float m_turningTorqueFactor = 35F;
+    public float min_distance_reward = 20f;
+    public float max_distance_reward = 200f;
+    public float goal_achieved_reward = 0.1f;
+
 
     private float m_verticalInput = 0F;
     private float m_horizontalInput = 0F;
     private Rigidbody m_rigidbody;
-    private Vector2 m_androidInputInit;
 
     private float accel = 0;
     private float accelBreak;
@@ -29,7 +32,7 @@ public class BoatAgent : Agent
     public Transform rudder;
     public Transform target;
     private Vector3 startPosition;
-    private float DIS_EPSILON = 20F;
+    private Quaternion startRotation;
 
     private float initial_distance;
     private float initial_angle;
@@ -39,15 +42,16 @@ public class BoatAgent : Agent
     private float angle;
     private Vector3 targetDir;
 
-    void Start()
+    public override void InitializeAgent()
     {
         // base.Start();
         m_rigidbody = GetComponent<Rigidbody>();
         startPosition = transform.position;
+        startRotation = transform.rotation;
         // m_rigidbody.drag = 1;
         //  m_rigidbody.angularDrag = 1;
         accelBreak = m_FinalSpeed * 0.3f;
-        dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
+        dist = getDistanceFromTarget();//Mathf.Abs(Vector3.Distance(transform.position, target.position));
 
         targetDir = target.position - transform.position;
         angle = Vector3.Angle(targetDir, transform.forward);
@@ -55,11 +59,9 @@ public class BoatAgent : Agent
         initial_angle = angle;
     }
 
-
-    public override List<float> CollectState()
+    public override void CollectObservations()
     {
-        List<float> state = new List<float>();
-
+        
         float normalized_x = (target.transform.position.x - transform.position.x) / (target.transform.position.x - startPosition.x);
         float normalized_z = (target.transform.position.z - transform.position.z) / (target.transform.position.z - startPosition.z);
         //float normalized_y = (target.transform.position.y - transform.position.y) / (target.transform.position.y - startPosition.y);
@@ -78,208 +80,202 @@ public class BoatAgent : Agent
         float normalized_rotation_y = (transform.rotation.y % 360);// 360;
 
         //Debug.Log("Rotation : ( " + normalized_rotation_x + " , " + normalized_rotation_z + " , " + normalized_rotation_y + ")");
-        state.Add(normalized_rotation_x);
-        state.Add(normalized_rotation_z);
+        AddVectorObs(normalized_rotation_x);
+        AddVectorObs(normalized_rotation_z);
         //state.Add(normalized_rotation_y);
 
         //finalspeed = 6 if any relation with this
-        float normalized_velocity_x = m_rigidbody.velocity.x ;// 20f;
-        float normalized_velocity_z = m_rigidbody.velocity.z ;// 20f;
-        float normalized_velocity_y = m_rigidbody.velocity.y ;// 20f;
+        float normalized_velocity_x = m_rigidbody.velocity.x;// 20f;
+        float normalized_velocity_z = m_rigidbody.velocity.z;// 20f;
+        float normalized_velocity_y = m_rigidbody.velocity.y;// 20f;
 
         //Debug.Log("Velocity : ( " + normalized_velocity_x + " , " + normalized_velocity_z + " , " + normalized_velocity_y + ")");
-        state.Add(normalized_velocity_x);
-        state.Add(normalized_velocity_z);
+        AddVectorObs(normalized_velocity_x);
+        AddVectorObs(normalized_velocity_z);
         //state.Add(normalized_velocity_y);
 
-        dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
-        state.Add(dist);
+        dist = getDistanceFromTarget();//Mathf.Abs(Vector3.Distance(transform.position, target.position));
+        AddVectorObs(dist);
+        targetDir = target.position - transform.position;
         angle = Vector3.Angle(targetDir, transform.forward);
-        state.Add(angle);
+        AddVectorObs(angle);
 
-        return state;
     }
 
-    public override void AgentStep(float[] act)
+    public override void AgentAction(float[] vectorAction, string textAction)
     {
+        //Debug.Log("vectorAction[0] = " + vectorAction[0] + " vectorAction[1] = " + vectorAction[1]);
+        m_verticalInput = vectorAction[0];
+        m_horizontalInput = vectorAction[1] / 10;
 
-        reward = -0.001f;
-        
-        if (brain.brainParameters.actionSpaceType == StateType.continuous)
+        m_verticalInput = Mathf.Clamp(m_verticalInput, -1f, 1f);
+        m_horizontalInput = Mathf.Clamp(m_horizontalInput, -1f, 1f);
+
+        SetReward(-0.01f);
+
+        if (m_verticalInput > 0)
         {
-            m_verticalInput = act[0];
-            //Debug.Log("vertical input = " + m_verticalInput.ToString());
-            m_verticalInput = Mathf.Clamp(m_verticalInput, -1f, 1f);
-            m_horizontalInput = act[1];
-            //Debug.Log("Horizontal input = " + m_horizontalInput.ToString());
-            m_horizontalInput = Mathf.Clamp(m_horizontalInput, -1f, 1f) ;
-            //m_horizontalInput = 0f;
-            //Debug.Log("vertical input = " + m_verticalInput.ToString() + " horizontal input = " + m_horizontalInput.ToString());
-                 
-            if (m_verticalInput > 0)
+            if (accel < m_FinalSpeed) { accel += (m_FinalSpeed * m_InertiaFactor); accel *= m_verticalInput; }
+        }
+        else if (m_verticalInput == 0)
+        {
+            if (accel > 0) { accel -= m_FinalSpeed * m_InertiaFactor; }
+            if (accel < 0) { accel += m_FinalSpeed * m_InertiaFactor; }
+        }
+        else if (m_verticalInput < 0)
+        {
+            if (accel > -accelBreak) { accel -= m_FinalSpeed * m_InertiaFactor * 2; }
+        }
+        //Debug.Log("Accel : " + accel);
+        m_rigidbody.AddRelativeForce(Vector3.forward * accel);
+
+        m_rigidbody.AddRelativeTorque(
+            m_verticalInput * -m_accelerationTorqueFactor,
+            m_horizontalInput * m_turningFactor,
+            m_horizontalInput * -m_turningTorqueFactor
+        );
+        /*if (rudder != null)
+        {
+            rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
+        }*/
+        if (m_motors.Count > 0)
+        {
+
+            float motorRotationAngle = 0F;
+            float motorMaxRotationAngle = 70;
+
+            motorRotationAngle = -m_horizontalInput * motorMaxRotationAngle;
+
+            for (int i = 0; i < m_motors.Count; i++)
             {
-                if (accel < m_FinalSpeed) { accel += (m_FinalSpeed * m_InertiaFactor); accel *= m_verticalInput; }
+                float currentAngleY = m_motors[i].transform.localEulerAngles.y;
+                if (currentAngleY > 180.0f)
+                    currentAngleY -= 360.0f;
+
+                float localEulerAngleY = Lerp(currentAngleY, motorRotationAngle, Time.deltaTime * 10);
+                m_motors[i].transform.localEulerAngles = new Vector3(
+                    m_motors[i].transform.localEulerAngles.x,
+                    localEulerAngleY,
+                    m_motors[i].transform.localEulerAngles.z
+                );
             }
-            else if (m_verticalInput == 0)
-            {
-                if (accel > 0) { accel -= m_FinalSpeed * m_InertiaFactor; }
-                if (accel < 0) { accel += m_FinalSpeed * m_InertiaFactor; }
-            }
-            else if (m_verticalInput < 0)
-            {
-                if (accel > -accelBreak) { accel -= m_FinalSpeed * m_InertiaFactor * 2; }
-            }
-            //Debug.Log("Accel : " + accel);
-            m_rigidbody.AddRelativeForce(Vector3.forward * accel);
+        }
 
-            m_rigidbody.AddRelativeTorque(
-                m_verticalInput * -m_accelerationTorqueFactor,
-                m_horizontalInput * m_turningFactor,
-                m_horizontalInput * -m_turningTorqueFactor
-            );
-            /*if (rudder != null)
-            {
-                rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
-            }*/
-            if (m_motors.Count > 0)
-            {
+        /*if (m_enableAudio && m_boatAudioSource != null)
+        {
 
-                float motorRotationAngle = 0F;
-                float motorMaxRotationAngle = 70;
+            float pitchLevel = m_boatAudioMaxPitch * Mathf.Abs(m_verticalInput);
+            if (m_verticalInput < 0) pitchLevel *= 0.7f;
 
-                motorRotationAngle = -m_horizontalInput * motorMaxRotationAngle;
-
-                for (int i = 0; i < m_motors.Count; i++)
-                {
-                    float currentAngleY = m_motors[i].transform.localEulerAngles.y;
-                    if (currentAngleY > 180.0f)
-                        currentAngleY -= 360.0f;
-
-                    float localEulerAngleY = Lerp(currentAngleY, motorRotationAngle, Time.deltaTime * 10);
-                    m_motors[i].transform.localEulerAngles = new Vector3(
-                        m_motors[i].transform.localEulerAngles.x,
-                        localEulerAngleY,
-                        m_motors[i].transform.localEulerAngles.z
-                    );
-                }
-            }
-
-            /*if (m_enableAudio && m_boatAudioSource != null)
-            {
-
-                float pitchLevel = m_boatAudioMaxPitch * Mathf.Abs(m_verticalInput);
-                if (m_verticalInput < 0) pitchLevel *= 0.7f;
-
-                if (pitchLevel < m_boatAudioMinPitch) pitchLevel = m_boatAudioMinPitch;
+            if (pitchLevel < m_boatAudioMinPitch) pitchLevel = m_boatAudioMinPitch;
 
 
-                float smoothPitchLevel = Lerp(m_boatAudioSource.pitch, pitchLevel, Time.deltaTime * 0.5f);
+            float smoothPitchLevel = Lerp(m_boatAudioSource.pitch, pitchLevel, Time.deltaTime * 0.5f);
 
-                m_boatAudioSource.pitch = smoothPitchLevel;
-            }*/
+            m_boatAudioSource.pitch = smoothPitchLevel;
+        }*/
 
-           
-            dist = Mathf.Abs(Vector3.Distance(transform.position, target.position));
+
+        //targetDir = target.position - transform.position;
+
+        //Debug.Log("angle = " + angle);
+
+        if (IsDone() == false)
+        {
+            dist = getDistanceFromTarget();//Vector3.Distance(transform.position, target.position);
             targetDir = target.position - transform.position;
             angle = Vector3.Angle(targetDir, transform.forward);
-            //Debug.Log("angle = " + angle);
-            if(done == false) 
+
+            //reward += (goal_achieved_reward * -1) * Mathf.Log(dist);
+            AddReward(Mathf.Exp(-dist) / 10);
+            Debug.Log("dist = " + dist + " vi = " + m_verticalInput + " hi = " + m_horizontalInput + " y = " + transform.position.y + " ang = " + angle + " rot z = " + Mathf.Abs(transform.rotation.z % 360) + " rot x = " + Mathf.Abs(transform.rotation.x % 360));
+            //Debug.Log("init dist 1 = " + initial_distance);
+
+            float dist_vect = (initial_distance - dist) / initial_distance;
+            if (dist_vect > 0)
             {
-                Debug.Log("dist = " + dist + " vi = " + m_verticalInput + " hi = " + m_horizontalInput  + " y = " + transform.position.y + " ang = " + angle + " rot z = " + Mathf.Abs(transform.rotation.z % 360) + " rot x = " + Mathf.Abs(transform.rotation.x % 360));
-                Debug.Log("init dist 1 = " + initial_distance);
-                /*if(dist < (last_dist - 1)) {
-                    reward += 0.1f;
-                }
-                if (dist < last_dist)
-                {
-                    reward += 0.1f;
-                }*/
-                float dist_vect= (initial_distance - dist) / initial_distance;
-                if(dist_vect > 0) {
-                    reward += 0.1f;
-                } else {
-                    reward -= 0.1f;
-                }
-                initial_distance = dist;
-                Debug.Log("init dist 2 = " + initial_distance);
-                /*if(angle > 30f) {
-                    reward -= 0.05f;
-                } */
-
-                if(m_verticalInput > 0) {
-                    reward += 0.01f;
-                }
-                if (initial_angle > angle) {
-                    reward += 0.05f;
-                } else {
-                    reward -= 0.05f;
-                }
-                initial_angle = angle;
-                /*if(m_verticalInput > 0 && angle <= 30) {
-                    reward += 0.4f;
-                }*/
-                if(Mathf.Abs(transform.rotation.z % 360) > 20f) 
-                {
-                    reward -= 0.05f;
-                }
-                if (Mathf.Abs(transform.rotation.x % 360) > 70f)
-                {
-                    reward -= 0.05f;
-                }
-
-
-                if (Mathf.Abs(transform.rotation.z % 360) > 90f || Mathf.Abs(transform.rotation.x % 360) > 90f)
-                {
-                    done = true;
-                    reward = -1f;
-                }
-
-                /*if(Mathf.Abs(transform.position.y) > 10f) {
-                    reward = -0.5f;
-                }*/
-
+                AddReward(0.5f);
+            } else {
+                AddReward(-1f);
             }
-            /*if (done == false && dist > 0)
+            initial_distance = dist;
+            //Debug.Log("init dist 2 = " + initial_distance);
+            /*if(angle > 30f) {
+                reward -= 0.01f ;
+            } */
+
+            if (m_verticalInput > 0)
             {
-                
-                reward = (1f / dist) - (angle / 180);
+                AddReward(0.1f);
+            } else {
+                AddReward(-0.1f);
+            }
+            if (angle < initial_angle )
+            {
+                AddReward(0.1f);
+            } else {
+                AddReward(-0.1f);
+            }
+            initial_angle = angle;
+            if(angle > 30f) {
+                AddReward(-1f);
+            } 
+            /*if(m_verticalInput > 0 && angle <= 30) {
+                reward += 0.4f;
             }*/
-        }
-        else
-        {
-            Debug.LogError("Only Continuous scenario is allowed");
-            return;
+            /*if(Mathf.Abs(transform.rotation.z % 360) > 20f) 
+            {
+                reward -= 0.1f;
+            }
+            if (Mathf.Abs(transform.rotation.x % 360) > 70f)
+            {
+                reward -= 0.1f;
+            }*/
+
+
+            if (Mathf.Abs(transform.rotation.z % 360) > 90f || Mathf.Abs(transform.rotation.x % 360) > 90f)
+            {
+                Done();
+                AddReward(-1f);
+            }
+
+            /*if(Mathf.Abs(transform.position.y) > 10f) {
+                reward = -0.5f;
+            }*/
+
         }
 
-        //Debug.Log("Distance to target = " + dist.ToString());
-        //Debug.Log("Last Distance to target = " + last_dist.ToString());
-        //Debug.Log("Angle between the target and the boat = " + angle.ToString());
-        if (dist < DIS_EPSILON)
+        if (dist <= min_distance_reward)
         {
-            done = true;
-            reward = 1f;
+            Done();
+            AddReward(1f);
         }
-        Debug.Log("reward = " + reward.ToString());
+        //Debug.Log("reward = " + GetReward());
     }
 
     public override void AgentReset()
     {
-        m_rigidbody.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
-
-        m_rigidbody.velocity = new Vector3(0f, 0f, 0f);
+        m_rigidbody.transform.rotation = startRotation;
+        m_rigidbody.velocity = Vector3.zero;
+        m_rigidbody.angularVelocity = Vector3.zero;
         transform.position = startPosition;
-        //transform.rotation = startState.rotation;
+
     }
-    /*
+
     public override void AgentOnDone()
     {
 
-    }*/
+    }
+
 
     static float Lerp(float from, float to, float value)
     {
         if (value < 0.0f) return from;
         else if (value > 1.0f) return to;
         return (to - from) * value + from;
+    }
+    private float getDistanceFromTarget() {
+        return Mathf.Sqrt(Mathf.Pow(target.position.x - transform.position.x, 2) + 
+                          Mathf.Pow(target.position.z - transform.position.z, 2));
     }
 }
