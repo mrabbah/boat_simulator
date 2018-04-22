@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Scenes/Ocean_with_rc_boat_island_02.unity
+- path: Assets/Scenes/no_obstacle_one_boat_learning.unity
   isLoaded: 1
   isActive: 1
