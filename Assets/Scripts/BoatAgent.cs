@@ -31,9 +31,18 @@ public class BoatAgent : Agent
 
     public Transform rudder;
     public Transform target;
+    public bool drawLine = false;
+    public LineRenderer targetFollower;
+
+    public bool randomTargetPosition = true;
+    public float maxDistance = 500f;
+    public float minDistance = 300f;
+
+
     private Vector3 startPosition;
     private Quaternion startRotation;
     private float startDistance;
+
 
     private float dist_n_1; // Distance in step n - 1
     private float angle_n_1; //Angle in step n - 1
@@ -41,6 +50,8 @@ public class BoatAgent : Agent
     private float dist_n; // Distance in current step
 
     private float angle_n; // Angle in current step
+
+    private float[] c_reward = {0f, 0f, 0f,0f, 0f, 0f};
 
     public override void InitializeAgent()
     {
@@ -104,7 +115,7 @@ public class BoatAgent : Agent
     {
         //Debug.Log("vectorAction[0] = " + vectorAction[0] + " vectorAction[1] = " + vectorAction[1]);
         m_verticalInput = vectorAction[0];
-        m_horizontalInput = vectorAction[1] / 10f;
+        m_horizontalInput = vectorAction[1] ;// 10f;
 
         m_verticalInput = Mathf.Clamp(m_verticalInput, -1f, 1f);
         m_horizontalInput = Mathf.Clamp(m_horizontalInput, -1f, 1f);
@@ -134,6 +145,10 @@ public class BoatAgent : Agent
         {
             rudder.localRotation = Quaternion.Euler(0, m_horizontalInput * -25, 90);
         }*/
+        if(drawLine) {
+            targetFollower.SetPosition(0, transform.position);
+            targetFollower.SetPosition(1, target.position);
+        }
         if (m_motors.Count > 0)
         {
 
@@ -191,7 +206,10 @@ public class BoatAgent : Agent
         m_rigidbody.velocity = Vector3.zero;
         m_rigidbody.angularVelocity = Vector3.zero;
         transform.position = startPosition;
-
+        if(randomTargetPosition) {
+            Vector3 randPoint = Random.insideUnitSphere * Random.Range(minDistance, maxDistance);
+            target.transform.position = transform.position + new Vector3(randPoint.x, 0, randPoint.z);
+        }
     }
 
     public override void AgentOnDone()
@@ -247,17 +265,7 @@ public class BoatAgent : Agent
         AddReward(reward);
 
 
-        /*if (m_verticalInput > 0)
-        {
-            AddReward(0.01f);
-        }*/
-        /*
-        float d_dist = (dist_n_1 - dist_n) / dist_n_1;
 
-        if(d_dist <= 0) {
-            AddReward(-10);
-        } 
-        */
         if(angle_n > 40) {
             //SetReward(-1);
             Done();
@@ -278,75 +286,25 @@ public class BoatAgent : Agent
             SetReward(10f);
             Done();
             Debug.Log("Goal achieved reward = " + GetReward());
+
             return;
         }
 
         //Debug.Log("reward = " + GetReward());
+        c_reward[0] = c_reward[1];
+        c_reward[1] = c_reward[2];
+        c_reward[2] = c_reward[3];
+        c_reward[3] = c_reward[4];
+        c_reward[4] = c_reward[5];
+        c_reward[5] = GetCumulativeReward();
+        Monitor.Log("Reward :", GetReward(), MonitorType.slider);
+        Monitor.Log("Cumulative reward : ", c_reward, MonitorType.hist);
+        Monitor.Log("Step number : ", GetStepCount(), MonitorType.text);
 
         //Save current state to the next iteration
         dist_n_1 = dist_n;
         angle_n_1 = angle_n;
     }
 
-    /*
-        //reward += (goal_achieved_reward * -1) * Mathf.Log(dist);
-        float basic_reward = Mathf.Exp(-dist);
-        AddReward(basic_reward);
-        //Debug.Log("dist = " + dist + " vi = " + m_verticalInput + " hi = " + m_horizontalInput + " y = " + transform.position.y + " ang = " + angle + " rot z = " + Mathf.Abs(transform.rotation.z % 360) + " rot x = " + Mathf.Abs(transform.rotation.x % 360));
-        //Debug.Log("init dist 1 = " + initial_distance);
-
-        float dist_vect = (initial_distance - dist) / initial_distance;
-        if (dist_vect > 0)
-        {
-            AddReward(5f);
-        }
-        else
-        {
-            AddReward(-1f);
-        }
-        initial_distance = dist;
-        //Debug.Log("init dist 2 = " + initial_distance);
-        /*if(angle > 30f) {
-            reward -= 0.01f ;
-        } */
-    /*
-    if (m_verticalInput > 0)
-    {
-        AddReward(0.1f);
-    }
-    else
-    {
-        AddReward(-0.1f);
-    }
-    if (angle < initial_angle)
-    {
-        AddReward(1f);
-    }
-    else
-    {
-        AddReward(-1f);
-    }
-    initial_angle = angle;
-    if (angle > 30f)
-    {
-        AddReward(-10f);
-    }
-    /*if(m_verticalInput > 0 && angle <= 30) {
-        reward += 0.4f;
-    }*/
-    /*if(Mathf.Abs(transform.rotation.z % 360) > 20f) 
-    {
-        reward -= 0.1f;
-    }
-    if (Mathf.Abs(transform.rotation.x % 360) > 70f)
-    {
-        reward -= 0.1f;
-    }*/
-
-
-
-
-    /*if(Mathf.Abs(transform.position.y) > 10f) {
-        reward = -0.5f;
-    }*/
+   
 }

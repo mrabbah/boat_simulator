@@ -22,6 +22,8 @@ TagManager:
   - orangeBlock
   - block
   - orangeGoal
+  - Ocean
+  - Boat_Target
   layers:
   - Default
   - TransparentFX

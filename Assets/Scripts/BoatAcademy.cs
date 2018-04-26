@@ -4,8 +4,15 @@ using UnityEngine;
 
 public class BoatAcademy : Academy {
 
+   
+    public override void InitializeAcademy()
+    {
+        Monitor.verticalOffset = 10f;
+    }
+
     public override void AcademyReset()
     {
+        
 
     }
 

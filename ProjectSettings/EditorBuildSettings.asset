@@ -5,7 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/no_obstacle_one_boat_learning.unity
     guid: fe6b0799c60414825b78f3ffa42f1f6a
+  - enabled: 1
+    path: Assets/Scenes/no_obstacle_multi_boat_learning.unity
+    guid: 8e2d3ca3bd7bc447db76ff8c2cc708c9
+  - enabled: 0
+    path: Assets/Scenes/no_obstacle_one_boat_learning_storm.unity
+    guid: a002b001c98234ff4bde7dd9b32f1486
   m_configObjects: {}
