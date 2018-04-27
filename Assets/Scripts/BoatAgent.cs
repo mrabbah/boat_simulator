@@ -12,11 +12,11 @@ public class BoatAgent : Agent
     [SerializeField] private float m_boatAudioMinPitch = 0.4F;
     [SerializeField] private float m_boatAudioMaxPitch = 1.2F;
 
-    [SerializeField] public float m_FinalSpeed = 100F;
-    [SerializeField] public float m_InertiaFactor = 0.005F;
-    [SerializeField] public float m_turningFactor = 2.0F;
-    [SerializeField] public float m_accelerationTorqueFactor = 35F;
-    [SerializeField] public float m_turningTorqueFactor = 35F;
+    [SerializeField] public float m_FinalSpeed = 6;
+    [SerializeField] public float m_InertiaFactor = 0.01F;
+    [SerializeField] public float m_turningFactor = 10.0F;
+    [SerializeField] public float m_accelerationTorqueFactor = 5F;
+    [SerializeField] public float m_turningTorqueFactor = 5F;
     public float min_distance_reward = 20f;
     public float max_distance_reward = 200f;
     public float goal_achieved_reward = 0.1f;
@@ -134,6 +134,7 @@ public class BoatAgent : Agent
             if (accel > -accelBreak) { accel -= m_FinalSpeed * m_InertiaFactor * 2; }
         }
         //Debug.Log("Accel : " + accel);
+        Monitor.Log("Accel :", accel, MonitorType.slider);
         m_rigidbody.AddRelativeForce(Vector3.forward * accel);
 
         m_rigidbody.AddRelativeTorque(
@@ -172,7 +173,7 @@ public class BoatAgent : Agent
             }
         }
 
-        /*if (m_enableAudio && m_boatAudioSource != null)
+        if (m_enableAudio && m_boatAudioSource != null)
         {
 
             float pitchLevel = m_boatAudioMaxPitch * Mathf.Abs(m_verticalInput);
@@ -184,7 +185,7 @@ public class BoatAgent : Agent
             float smoothPitchLevel = Lerp(m_boatAudioSource.pitch, pitchLevel, Time.deltaTime * 0.5f);
 
             m_boatAudioSource.pitch = smoothPitchLevel;
-        }*/
+        }
 
 
         //targetDir = target.position - transform.position;
@@ -291,20 +292,24 @@ public class BoatAgent : Agent
         }
 
         //Debug.Log("reward = " + GetReward());
-        c_reward[0] = c_reward[1];
-        c_reward[1] = c_reward[2];
-        c_reward[2] = c_reward[3];
-        c_reward[3] = c_reward[4];
-        c_reward[4] = c_reward[5];
-        c_reward[5] = GetCumulativeReward();
-        Monitor.Log("Reward :", GetReward(), MonitorType.slider);
-        Monitor.Log("Cumulative reward : ", c_reward, MonitorType.hist);
-        Monitor.Log("Step number : ", GetStepCount(), MonitorType.text);
+        DrawStats();
 
         //Save current state to the next iteration
         dist_n_1 = dist_n;
         angle_n_1 = angle_n;
     }
 
+    private void DrawStats() {
+        c_reward[0] = c_reward[1];
+        c_reward[1] = c_reward[2];
+        c_reward[2] = c_reward[3];
+        c_reward[3] = c_reward[4];
+        c_reward[4] = c_reward[5];
+        c_reward[5] = GetCumulativeReward();
+
+        Monitor.Log("Reward :", GetReward(), MonitorType.slider);
+        Monitor.Log("Cumulative reward : ", c_reward, MonitorType.hist);
+        Monitor.Log("Step number : ", GetStepCount(), MonitorType.text);
+    }
    
 }

@@ -1,10 +1,11 @@
 
 Assets/ML-Agents
 Library
-
+.vs
 *.pyc
-python/.DS_Store
-Assets/.DS_Store
-Assets/models/.DS_Store
+.DS_Store
 *.log
-python/unity-environment.log
+*.app
+*.exe
+Temp
+
