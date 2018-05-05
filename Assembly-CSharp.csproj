@@ -132,10 +132,12 @@
     <Compile Include="Assets\Ocean\Scripts\Ocean.cs" />
     <Compile Include="Assets\Ocean\Scripts\presetLoader.cs" />
     <Compile Include="Assets\Ocean\Scripts\SmoothFollow.cs" />
+    <Compile Include="Assets\Scripts\AbstractBoatAgent.cs" />
     <Compile Include="Assets\Scripts\BoatAcademy.cs" />
     <Compile Include="Assets\Scripts\BoatAgent.cs" />
     <Compile Include="Assets\Scripts\BoatAgentNoPolicyImit.cs" />
     <Compile Include="Assets\Scripts\BoatDecision.cs" />
+    <Compile Include="Assets\Scripts\ExternalBoatAgent.cs" />
     <Compile Include="Assets\Scripts\ThirdPersonCamera.cs" />
     <None Include="Assets\Ocean\Shaders\Ocean.shader" />
     <None Include="Assets\Ocean\Shaders\OceanL4.shader" />

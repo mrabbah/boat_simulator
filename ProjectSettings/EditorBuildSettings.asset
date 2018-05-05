@@ -17,7 +17,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/imit_no_obstacle_one_boat_learning.unity
     guid: 7d2270d825d4949dda7862f250433113
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/imit_no_plicy_no_obstacle_one_boat_learning.unity
     guid: 8af1740e632644508a7dc9cea19cdc0e
+  - enabled: 1
+    path: Assets/Scenes/external_no_obstacle_one_boat_learning.unity
+    guid: 4d3110251d840456595f5926c8f2742e
   m_configObjects: {}
