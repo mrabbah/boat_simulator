@@ -4,9 +4,9 @@ from copdaitrainers.models import LearningModel
 
 
 class BehavioralCloningModel(LearningModel):
-    def __init__(self, brain, h_size=128, lr=1e-4, n_layers=2, m_size=128,
+    def __init__(self, env, brain_name, h_size=128, lr=1e-4, n_layers=2, m_size=128,
                  normalize=False, use_recurrent=False):
-        LearningModel.__init__(self, m_size, normalize, use_recurrent, brain)
+        LearningModel.__init__(self, m_size, normalize, use_recurrent, env, brain_name)
 
         num_streams = 1
         hidden_streams = self.create_new_obs(num_streams, h_size, n_layers)
@@ -20,7 +20,7 @@ class BehavioralCloningModel(LearningModel):
         self.policy = tf.layers.dense(hidden_reg, self.a_size, activation=None, use_bias=False,
                                       kernel_initializer=c_layers.variance_scaling_initializer(factor=0.01))
 
-        if brain.vector_action_space_type == "discrete":
+        if env.get_action_space_type(brain_name) == "discrete":
             self.action_probs = tf.nn.softmax(self.policy)
             self.sample_action_float = tf.multinomial(self.policy, 1)
             self.sample_action_float = tf.identity(self.sample_action_float, name="action")

@@ -74,7 +74,8 @@ class BehavioralCloningTrainer(Trainer):
                 m_size=self.m_size,
                 normalize=False,
                 use_recurrent=trainer_parameters['use_recurrent'],
-                brain=self.brain)
+                env=env,
+                brain_name=brain_name)
 
     def __str__(self):
 
@@ -292,14 +293,15 @@ class BehavioralCloningTrainer(Trainer):
                          self.model.batch_size: self.n_sequences,
                          self.model.sequence_length: self.sequence_length}
             if self.is_continuous_action:
-                feed_dict[self.model.true_action] = batch_actions.reshape([-1, self.brain.vector_action_space_size])
+                feed_dict[self.model.true_action] = batch_actions.reshape([-1, self.env.get_action_space_size(self.brain_name)])
             else:
                 feed_dict[self.model.true_action] = batch_actions.reshape([-1])
             if not self.is_continuous_observation:
-                feed_dict[self.model.vector_in] = batch_states.reshape([-1, self.brain.num_stacked_vector_observations])
+                feed_dict[self.model.vector_in] = batch_states.reshape([-1, self.env.get_num_stacked_observations(self.brain_name)])
             else:
-                feed_dict[self.model.vector_in] = batch_states.reshape([-1, self.brain.vector_observation_space_size *
-                                                                       self.brain.num_stacked_vector_observations])
+                feed_dict[self.model.vector_in] = batch_states.reshape([-1, self.env.get_observation_space_size(self.brain_name) *
+                                                                        self.env.get_num_stacked_observations(
+                                                                            self.brain_name)])
             if self.use_observations:
                 for i, _ in enumerate(self.model.visual_in):
                     _obs = np.array(_buffer['visual_observations%d' % i][start:end])

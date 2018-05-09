@@ -22,12 +22,13 @@ class Trainer(object):
         """
         Responsible for collecting experiences and training a neural network model.
         :param sess: Tensorflow session.
-        :param env: The UnityEnvironment.
+        :param env: The Running Environment.
         :param  trainer_parameters: The parameters for the trainer (dictionary).
         :param training: Whether the trainer is set for training.
         """
         self.brain_name = brain_name
-        self.brain = env.brains[self.brain_name]
+        self.env = env
+        # self.brain = env.brains[self.brain_name]
         self.trainer_parameters = trainer_parameters
         self.is_training = training
         self.sess = sess

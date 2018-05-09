@@ -12,12 +12,14 @@ import yaml
 from tensorflow.python.tools import freeze_graph
 from copdaitrainers.ppo.trainer import PPOTrainer
 from copdaitrainers.bc.trainer import BehavioralCloningTrainer
-from unityagents import UnityEnvironment, UnityEnvironmentException
+from copdaitrainers.running_environments import RunningEnvironment
+from copdaitrainers.data_processing import DataReader
+from copdaitrainers.data_processing import DataWriter
 
 
 class TrainerController(object):
     def __init__(self, env_path, run_id, save_freq, curriculum_file, fast_simulation, load, train,
-                 worker_id, keep_checkpoints, lesson, seed, docker_target_name, trainer_config_path):
+                 worker_id, keep_checkpoints, lesson, seed, docker_target_name, trainer_config_path, environment):
         """
 
         :param env_path: Location to the environment executable to be loaded.
@@ -33,8 +35,10 @@ class TrainerController(object):
         :param seed: Random seed used for training.
         :param docker_target_name: Name of docker volume that will contain all data.
         :param trainer_config_path: Fully qualified path to location of trainer configuration file
+        :param environment: The running environment
         """
         self.trainer_config_path = trainer_config_path
+
         env_path = (env_path.strip()
                     .replace('.app', '')
                     .replace('.exe', '')
@@ -67,31 +71,19 @@ class TrainerController(object):
         self.train_model = train
         self.worker_id = worker_id
         self.keep_checkpoints = keep_checkpoints
+        self.environment = environment
         self.trainers = {}
         if seed == -1:
             seed = np.random.randint(0, 999999)
         self.seed = seed
         np.random.seed(self.seed)
         tf.set_random_seed(self.seed)
-        self.env = UnityEnvironment(file_name=env_path, worker_id=self.worker_id,
-                                    curriculum=self.curriculum_file, seed=self.seed)
+        self.env = RunningEnvironment.factory(environment, env_path, self.worker_id, self.curriculum_file, self.seed)
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
+        self.data_reader = DataReader(self.env)
+        self.data_writer = DataWriter(self.env)
 
-    def _get_progress(self):
-        if self.curriculum_file is not None:
-            progress = 0
-            if self.env.curriculum.measure_type == "progress":
-                for brain_name in self.env.external_brain_names:
-                    progress += self.trainers[brain_name].get_step / self.trainers[brain_name].get_max_steps
-                return progress / len(self.env.external_brain_names)
-            elif self.env.curriculum.measure_type == "reward":
-                for brain_name in self.env.external_brain_names:
-                    progress += self.trainers[brain_name].get_last_reward
-                return progress
-            else:
-                return None
-        else:
-            return None
+
 
     def _process_graph(self):
         nodes = []
@@ -147,9 +139,9 @@ class TrainerController(object):
     def _initialize_trainers(self, trainer_config, sess):
         trainer_parameters_dict = {}
         self.trainers = {}
-        for brain_name in self.env.external_brain_names:
+        for brain_name in self.env.get_trainers_names():
             trainer_parameters = trainer_config['default'].copy()
-            if len(self.env.external_brain_names) > 1:
+            if len(self.env.get_trainers_names()) > 1:
                 graph_scope = re.sub('[^0-9a-zA-Z]+', '-', brain_name)
                 trainer_parameters['graph_scope'] = graph_scope
                 trainer_parameters['summary_path'] = '{basedir}/{name}'.format(
@@ -167,7 +159,7 @@ class TrainerController(object):
                 for k in trainer_config[_brain_key]:
                     trainer_parameters[k] = trainer_config[_brain_key][k]
             trainer_parameters_dict[brain_name] = trainer_parameters.copy()
-        for brain_name in self.env.external_brain_names:
+        for brain_name in self.env.get_trainers_names():
             if trainer_parameters_dict[brain_name]['trainer'] == "imitation":
                 self.trainers[brain_name] = BehavioralCloningTrainer(sess, self.env, brain_name,
                                                                      trainer_parameters_dict[brain_name],
@@ -176,7 +168,7 @@ class TrainerController(object):
                 self.trainers[brain_name] = PPOTrainer(sess, self.env, brain_name, trainer_parameters_dict[brain_name],
                                                        self.train_model, self.seed)
             else:
-                raise UnityEnvironmentException("The trainer config contains an unknown trainer type for brain {}"
+                raise Exception("The trainer config contains an unknown trainer type for brain {}"
                                                 .format(brain_name))
 
     def _load_config(self):
@@ -185,11 +177,11 @@ class TrainerController(object):
                 trainer_config = yaml.load(data_file)
                 return trainer_config
         except IOError:
-            raise UnityEnvironmentException("""Parameter file could not be found here {}.
+            raise Exception("""Parameter file could not be found here {}.
                                             Will use default Hyper parameters"""
                                             .format(self.trainer_config_path))
         except UnicodeDecodeError:
-            raise UnityEnvironmentException("There was an error decoding Trainer Config from this path : {}"
+            raise Exception("There was an error decoding Trainer Config from this path : {}"
                                             .format(self.trainer_config_path))
 
     @staticmethod
@@ -198,12 +190,12 @@ class TrainerController(object):
             if not os.path.exists(model_path):
                 os.makedirs(model_path)
         except Exception:
-            raise UnityEnvironmentException("The folder {} containing the generated model could not be accessed."
+            raise Exception("The folder {} containing the generated model could not be accessed."
                                             " Please make sure the permissions are set correctly."
                                             .format(model_path))
 
     def start_learning(self):
-        self.env.curriculum.set_lesson_number(self.lesson)
+        self.env.set_lesson_number(self.lesson)
         trainer_config = self._load_config()
         self._create_model_path(self.model_path)
 
@@ -226,16 +218,18 @@ class TrainerController(object):
             else:
                 sess.run(init)
             global_step = 0  # This is only for saving the model
-            self.env.curriculum.increment_lesson(self._get_progress())
-            curr_info = self.env.reset(train_mode=self.fast_simulation)
+            self.env.increment_lesson(self.trainers)
+            self.env.initialize(self.fast_simulation)
+            curr_info = self.data_reader.get_current_info()
             if self.train_model:
                 for brain_name, trainer in self.trainers.items():
                     trainer.write_tensorboard_text('Hyperparameters', trainer.parameters)
             try:
                 while any([t.get_step <= t.get_max_steps for k, t in self.trainers.items()]) or not self.train_model:
-                    if self.env.global_done:
-                        self.env.curriculum.increment_lesson(self._get_progress())
-                        curr_info = self.env.reset(train_mode=self.fast_simulation)
+                    if self.env.is_global_done():
+                        self.env.increment_lesson(self.trainers)
+                        self.env.initialize(self.fast_simulation)
+                        curr_info = self.data_reader.get_current_info()
                         for brain_name, trainer in self.trainers.items():
                             trainer.end_episode()
                     # Decide and take an action
@@ -245,8 +239,10 @@ class TrainerController(object):
                          take_action_memories[brain_name],
                          take_action_text[brain_name],
                          take_action_outputs[brain_name]) = trainer.take_action(curr_info)
-                    new_info = self.env.step(vector_action=take_action_vector, memory=take_action_memories,
-                                             text_action=take_action_text)
+
+                    self.data_writer.write_data(take_action_vector, take_action_memories,
+                                                take_action_text)
+                    new_info = self.data_reader.get_current_info()
 
                     for brain_name, trainer in self.trainers.items():
                         trainer.add_experiences(curr_info, new_info, take_action_outputs[brain_name])
@@ -257,7 +253,7 @@ class TrainerController(object):
                             # Perform gradient descent with experience buffer
                             trainer.update_model()
                         # Write training statistics to tensorboard.
-                        trainer.write_summary(self.env.curriculum.lesson_number)
+                        trainer.write_summary(self.env.get_lesson_number())
                         if self.train_model and trainer.get_step <= trainer.get_max_steps:
                             trainer.increment_step()
                             trainer.update_last_reward()

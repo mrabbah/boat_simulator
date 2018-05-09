@@ -23,7 +23,7 @@ class PPOTrainer(Trainer):
         """
         Responsible for collecting experiences and training PPO model.
         :param sess: Tensorflow session.
-        :param env: The UnityEnvironment.
+        :param env: The Running Environment.
         :param  trainer_parameters: The parameters for the trainer (dictionary).
         :param training: Whether the trainer is set for training.
         """
@@ -57,7 +57,7 @@ class PPOTrainer(Trainer):
         self.variable_scope = trainer_parameters['graph_scope']
         with tf.variable_scope(self.variable_scope):
             tf.set_random_seed(seed)
-            self.model = PPOModel(env.brains[brain_name],
+            self.model = PPOModel(env, brain_name,
                                   lr=float(trainer_parameters['learning_rate']),
                                   h_size=int(trainer_parameters['hidden_units']),
                                   epsilon=float(trainer_parameters['epsilon']),
@@ -75,9 +75,9 @@ class PPOTrainer(Trainer):
         self.training_buffer = Buffer()
         self.cumulative_rewards = {}
         self.episode_steps = {}
-        self.is_continuous = (env.brains[brain_name].vector_action_space_type == "continuous")
-        self.use_observations = (env.brains[brain_name].number_visual_observations > 0)
-        self.use_states = (env.brains[brain_name].vector_observation_space_size > 0)
+        self.is_continuous = (env.get_action_space_type(brain_name) == "continuous")
+        self.use_observations = (env.get_number_visual_observations(brain_name) > 0)
+        self.use_states = (env.get_observation_space_size(brain_name) > 0)
         self.summary_path = trainer_parameters['summary_path']
         if not os.path.exists(self.summary_path):
             os.makedirs(self.summary_path)
@@ -183,7 +183,7 @@ class PPOTrainer(Trainer):
                 curr_brain_info.memories = np.zeros((len(curr_brain_info.agents), self.m_size))
             feed_dict[self.model.memory_in] = curr_brain_info.memories
             run_list += [self.model.memory_out]
-        if (self.is_training and self.brain.vector_observation_space_type == "continuous" and
+        if (self.is_training and self.env.get_action_space_type(self.brain_name) == "continuous" and
                 self.use_states and self.trainer_parameters['normalize']):
             new_mean, new_variance = self.running_average(
                 curr_brain_info.vector_observations, steps, self.model.running_mean, self.model.running_variance)
@@ -357,10 +357,10 @@ class PPOTrainer(Trainer):
                              self.model.old_value: np.array(_buffer['value_estimates'][start:end]).reshape([-1]),
                              self.model.advantage: np.array(_buffer['advantages'][start:end]).reshape([-1, 1]),
                              self.model.all_old_probs: np.array(
-                                 _buffer['action_probs'][start:end]).reshape([-1, self.brain.vector_action_space_size])}
+                                 _buffer['action_probs'][start:end]).reshape([-1, self.env.get_action_space_size(self.brain_name)])}
                 if self.is_continuous:
                     feed_dict[self.model.epsilon] = np.array(
-                        _buffer['epsilons'][start:end]).reshape([-1, self.brain.vector_action_space_size])
+                        _buffer['epsilons'][start:end]).reshape([-1, self.env.get_action_space_size(self.brain_name)])
                 else:
                     feed_dict[self.model.action_holder] = np.array(
                         _buffer['actions'][start:end]).reshape([-1])
@@ -368,13 +368,13 @@ class PPOTrainer(Trainer):
                         feed_dict[self.model.prev_action] = np.array(
                             _buffer['prev_action'][start:end]).reshape([-1])
                 if self.use_states:
-                    if self.brain.vector_observation_space_type == "continuous":
+                    if self.env.get_action_space_type(self.brain_name) == "continuous":
                         feed_dict[self.model.vector_in] = np.array(
                             _buffer['states'][start:end]).reshape(
-                            [-1, self.brain.vector_observation_space_size * self.brain.num_stacked_vector_observations])
+                            [-1, self.env.get_observation_space_size(self.brain_name) * self.env.get_num_stacked_observations(self.brain_name)])
                     else:
                         feed_dict[self.model.vector_in] = np.array(
-                            _buffer['states'][start:end]).reshape([-1, self.brain.num_stacked_vector_observations])
+                            _buffer['states'][start:end]).reshape([-1, self.env.get_num_stacked_observations(self.brain_name)])
                 if self.use_observations:
                     for i, _ in enumerate(self.model.visual_in):
                         _obs = np.array(_buffer['observations%d' % i][start:end])

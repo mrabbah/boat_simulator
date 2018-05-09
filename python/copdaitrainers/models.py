@@ -8,8 +8,9 @@ logger = logging.getLogger("unityagents")
 
 
 class LearningModel(object):
-    def __init__(self, m_size, normalize, use_recurrent, brain):
-        self.brain = brain
+    def __init__(self, m_size, normalize, use_recurrent, env, brain_name):
+        self.brain_name = brain_name
+        self.env = env
         self.vector_in = None
         self.normalize = False
         self.use_recurrent = False
@@ -20,7 +21,7 @@ class LearningModel(object):
         self.m_size = m_size
         self.normalize = normalize
         self.use_recurrent = use_recurrent
-        self.a_size = brain.vector_action_space_size
+        self.a_size = env.get_action_space_size(brain_name)
 
     @staticmethod
     def create_global_steps():
@@ -45,7 +46,7 @@ class LearningModel(object):
         return visual_in
 
     def create_vector_input(self, s_size):
-        if self.brain.vector_observation_space_type == "continuous":
+        if self.env.get_observation_space_type(self.brain_name) == "continuous":
             self.vector_in = tf.placeholder(shape=[None, s_size], dtype=tf.float32, name='vector_observation')
             if self.normalize:
                 self.running_mean = tf.get_variable("running_mean", [s_size], trainable=False, dtype=tf.float32,
@@ -115,17 +116,16 @@ class LearningModel(object):
         return hidden
 
     def create_new_obs(self, num_streams, h_size, num_layers):
-        brain = self.brain
-        s_size = brain.vector_observation_space_size * brain.num_stacked_vector_observations
-        if brain.vector_action_space_type == "continuous":
+
+        s_size = self.env.get_observation_space_size(self.brain_name) * self.env.get_num_stacked_observations(self.brain_name)
+        if self.env.get_action_space_type(self.brain_name) == "continuous":
             activation_fn = tf.nn.tanh
         else:
             activation_fn = self.swish
 
         self.visual_in = []
-        for i in range(brain.number_visual_observations):
-            height_size, width_size = brain.camera_resolutions[i]['height'], brain.camera_resolutions[i]['width']
-            bw = brain.camera_resolutions[i]['blackAndWhite']
+        for i in range(self.env.get_number_visual_observations(self.brain_name)):
+            height_size, width_size, bw = self.env.get_camera_resolutions(self.brain_name, i)
             visual_input = self.create_visual_input(height_size, width_size, bw, name="visual_observation_" + str(i))
             self.visual_in.append(visual_input)
         self.create_vector_input(s_size)
@@ -134,14 +134,14 @@ class LearningModel(object):
         for i in range(num_streams):
             visual_encoders = []
             hidden_state, hidden_visual = None, None
-            if brain.number_visual_observations > 0:
-                for j in range(brain.number_visual_observations):
+            if self.env.get_number_visual_observations(self.brain_name) > 0:
+                for j in range(self.env.get_number_visual_observations(self.brain_name)):
                     encoded_visual = self.create_visual_encoder(h_size, activation_fn, num_layers)
                     visual_encoders.append(encoded_visual)
                 hidden_visual = tf.concat(visual_encoders, axis=1)
-            if brain.vector_observation_space_size > 0:
-                s_size = brain.vector_observation_space_size * brain.num_stacked_vector_observations
-                if brain.vector_observation_space_type == "continuous":
+            if self.env.get_observation_space_size(self.brain_name) > 0:
+                s_size = self.env.get_observation_space_size(self.brain_name) * self.env.get_num_stacked_observations(self.brain_name)
+                if self.env.get_observation_space_type(self.brain_name) == "continuous":
                     hidden_state = self.create_continuous_state_encoder(h_size, activation_fn, num_layers)
                 else:
                     hidden_state = self.create_discrete_state_encoder(s_size, h_size,
