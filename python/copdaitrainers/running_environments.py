@@ -65,6 +65,10 @@ class RunningEnvironment(ABC):
     def get_camera_resolutions(self, brain_name, camera_index):
         pass
 
+    @abstractmethod
+    def close(self):
+        pass
+
     def factory(type, env_path, worker_id, curriculum_file, seed):
         if type == "SIMULATION": return Simulator(env_path, worker_id, curriculum_file, seed)
         if type == "RCBOAT": return RcBoat()
@@ -86,7 +90,7 @@ class Simulator(RunningEnvironment):
         self.env = UnityEnvironment(file_name=env_path, worker_id=self.worker_id,
                                     curriculum=self.curriculum_file, seed=self.seed)
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
-        self.curr_info = []
+        self.curr_info = None
 
     def _get_progress(self, trainers):
         if self.curriculum_file is not None:
@@ -146,6 +150,8 @@ class Simulator(RunningEnvironment):
                 self.env.brains[brain_name].camera_resolutions[camera_index]['width'],
                 self.env.brains[brain_name].camera_resolutions[camera_index]['blackAndWhite']]
 
+    def close(self):
+        self.env.close()
 
 class RcBoat(RunningEnvironment):
 
@@ -193,4 +199,7 @@ class RcBoat(RunningEnvironment):
         pass
 
     def get_camera_resolutions(self, brain_name, camera_index):
+        pass
+
+    def close(self):
         pass
