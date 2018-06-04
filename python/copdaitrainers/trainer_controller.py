@@ -12,14 +12,21 @@ import yaml
 from tensorflow.python.tools import freeze_graph
 from copdaitrainers.ppo.trainer import PPOTrainer
 from copdaitrainers.bc.trainer import BehavioralCloningTrainer
-from copdaitrainers.running_environments import RunningEnvironment
+
+import zmq
+
+from copdaitrainers.parameters import EnvironmentHyperParam
 from copdaitrainers.data_processing import DataReader
 from copdaitrainers.data_processing import DataWriter
+from  multiprocessing import Process
+from copdaitrainers import sensor_data_pb2
+from copdaitrainers.util import function_inspector
 
 
 class TrainerController(object):
     def __init__(self, env_path, run_id, save_freq, curriculum_file, fast_simulation, load, train,
-                 worker_id, keep_checkpoints, lesson, seed, docker_target_name, trainer_config_path, environment):
+                 worker_id, keep_checkpoints, lesson, seed, docker_target_name, trainer_config_path, environment,
+                 service_url="tcp://*:5557", perception_url="tcp://localhost:5556", perception_topic=""):
         """
 
         :param env_path: Location to the environment executable to be loaded.
@@ -36,6 +43,9 @@ class TrainerController(object):
         :param docker_target_name: Name of docker volume that will contain all data.
         :param trainer_config_path: Fully qualified path to location of trainer configuration file
         :param environment: The running environment
+        :param service_url: The publisher service name
+        :param perception_url: The location of perception layer
+        :param perception_topic: the topic of the perception layer
         """
         self.trainer_config_path = trainer_config_path
 
@@ -78,11 +88,26 @@ class TrainerController(object):
         self.seed = seed
         np.random.seed(self.seed)
         tf.set_random_seed(self.seed)
-        self.env = RunningEnvironment.factory(environment, env_path, self.worker_id, self.curriculum_file, self.seed)
+        self.params = EnvironmentHyperParam.factory(environment, env_path, self.worker_id, self.curriculum_file, self.seed)
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
-        self.data_reader = DataReader(self.env)
-        self.data_writer = DataWriter(self.env)
+        self.data_reader = DataReader()
+        self.data_writer = DataWriter()
+        '''
+        #Init ZeroMq context
+        self.context = zmq.Context()
+        #init publisher
+        self.service_url = service_url
+        self.publisher = self.context.socket(zmq.PUB)
+        self.publisher.bind(service_url)
+        #init subscriber
+        self.perception_url = perception_url
+        self.perception_topic = perception_topic
+        self.receiver = self.context.socket(zmq.SUB)
+        self.receiver.connect(perception_url)
+        self.receiver.setsockopt(zmq.SUBSCRIBE, perception_topic)
 
+        # string = socket.recv()
+        '''
 
 
     def _process_graph(self):
@@ -139,9 +164,9 @@ class TrainerController(object):
     def _initialize_trainers(self, trainer_config, sess):
         trainer_parameters_dict = {}
         self.trainers = {}
-        for brain_name in self.env.get_trainers_names():
+        for brain_name in self._get_trainers_names():
             trainer_parameters = trainer_config['default'].copy()
-            if len(self.env.get_trainers_names()) > 1:
+            if len(self._get_trainers_names()) > 1:
                 graph_scope = re.sub('[^0-9a-zA-Z]+', '-', brain_name)
                 trainer_parameters['graph_scope'] = graph_scope
                 trainer_parameters['summary_path'] = '{basedir}/{name}'.format(
@@ -159,7 +184,7 @@ class TrainerController(object):
                 for k in trainer_config[_brain_key]:
                     trainer_parameters[k] = trainer_config[_brain_key][k]
             trainer_parameters_dict[brain_name] = trainer_parameters.copy()
-        for brain_name in self.env.get_trainers_names():
+        for brain_name in self._get_trainers_names():
             if trainer_parameters_dict[brain_name]['trainer'] == "imitation":
                 self.trainers[brain_name] = BehavioralCloningTrainer(sess, self.env, brain_name,
                                                                      trainer_parameters_dict[brain_name],
@@ -195,7 +220,7 @@ class TrainerController(object):
                                             .format(model_path))
 
     def start_learning(self):
-        self.env.set_lesson_number(self.lesson)
+        self._set_lesson_number(self.lesson)
         trainer_config = self._load_config()
         self._create_model_path(self.model_path)
 
@@ -218,17 +243,17 @@ class TrainerController(object):
             else:
                 sess.run(init)
             global_step = 0  # This is only for saving the model
-            self.env.increment_lesson(self.trainers)
-            self.env.initialize(self.fast_simulation)
+            self._increment_lesson(self.trainers)
+            self._initialize(self.fast_simulation)
             curr_info = self.data_reader.get_current_info()
             if self.train_model:
                 for brain_name, trainer in self.trainers.items():
                     trainer.write_tensorboard_text('Hyperparameters', trainer.parameters)
             try:
                 while any([t.get_step <= t.get_max_steps for k, t in self.trainers.items()]) or not self.train_model:
-                    if self.env.is_global_done():
-                        self.env.increment_lesson(self.trainers)
-                        self.env.initialize(self.fast_simulation)
+                    if self._is_global_done():
+                        self._increment_lesson(self.trainers)
+                        self._initialize(self.fast_simulation)
                         curr_info = self.data_reader.get_current_info()
                         for brain_name, trainer in self.trainers.items():
                             trainer.end_episode()
@@ -253,7 +278,7 @@ class TrainerController(object):
                             # Perform gradient descent with experience buffer
                             trainer.update_model()
                         # Write training statistics to tensorboard.
-                        trainer.write_summary(self.env.get_lesson_number())
+                        trainer.write_summary(self._get_lesson_number())
                         if self.train_model and trainer.get_step <= trainer.get_max_steps:
                             trainer.increment_step()
                             trainer.update_last_reward()
@@ -271,6 +296,38 @@ class TrainerController(object):
                     self.logger.info("Learning was interrupted. Please wait while the graph is generated.")
                     self._save_model(sess, steps=global_step, saver=saver)
                 pass
-        self.env.close()
+        self._close()
+        '''
+        self.publisher.close()
+        self.context.term()
+        '''
         if self.train_model:
             self._export_graph()
+
+    #@function_inspector
+    def _get_trainers_names(self):
+        return self.env.get_trainers_names()
+
+    #@function_inspector
+    def _set_lesson_number(self, lesson):
+        self.env.set_lesson_number(lesson)
+
+    #@function_inspector
+    def _increment_lesson(self, trainers):
+        self.env.increment_lesson(trainers)
+
+    #@function_inspector
+    def _initialize(self, fast_simulation):
+        self.env.initialize(fast_simulation)
+
+    #@function_inspector
+    def _is_global_done(self):
+        return self.env.is_global_done()
+
+    #@function_inspector
+    def _get_lesson_number(self):
+        return self.env.get_lesson_number()
+
+    #@function_inspector
+    def _close(self):
+        self.env.close()

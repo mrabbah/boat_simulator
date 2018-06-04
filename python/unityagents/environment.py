@@ -47,6 +47,8 @@ class UnityEnvironment(object):
             self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self._socket.bind(("localhost", self.port))
             self._open_socket = True
+
+
         except socket.error:
             self._open_socket = True
             self.close()
@@ -54,6 +56,9 @@ class UnityEnvironment(object):
                                "You may need to manually close a previously opened environment "
                                "or use a different worker number.".format(str(worker_id)))
 
+        '''
+        Lunching Unity Application
+        '''
         cwd = os.getcwd()
         file_name = (file_name.strip()
                      .replace('.app', '').replace('.exe', '').replace('.x86_64', '').replace('.x86', ''))
@@ -100,6 +105,9 @@ class UnityEnvironment(object):
                  '--port', str(self.port),
                  '--seed', str(seed)])
 
+        '''
+        End lunching Unity Application
+        '''
         self._socket.settimeout(30)
         try:
             try:

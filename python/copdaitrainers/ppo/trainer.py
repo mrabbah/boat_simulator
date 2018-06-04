@@ -12,6 +12,7 @@ from unityagents import AllBrainInfo
 from copdaitrainers.buffer import Buffer
 from copdaitrainers.ppo.models import PPOModel
 from copdaitrainers.trainer import UnityTrainerException, Trainer
+from copdaitrainers.util import function_inspector
 
 logger = logging.getLogger("unityagents")
 
@@ -183,13 +184,19 @@ class PPOTrainer(Trainer):
                 curr_brain_info.memories = np.zeros((len(curr_brain_info.agents), self.m_size))
             feed_dict[self.model.memory_in] = curr_brain_info.memories
             run_list += [self.model.memory_out]
-        if (self.is_training and self.env.get_action_space_type(self.brain_name) == "continuous" and
+        if (self.is_training and self._get_action_space_type(self.brain_name) == "continuous" and
                 self.use_states and self.trainer_parameters['normalize']):
             new_mean, new_variance = self.running_average(
                 curr_brain_info.vector_observations, steps, self.model.running_mean, self.model.running_variance)
             feed_dict[self.model.new_mean] = new_mean
             feed_dict[self.model.new_variance] = new_variance
             run_list = run_list + [self.model.update_mean, self.model.update_variance]
+        with open("copdaitrainers/data/my.log", "a+") as f:
+            f.write("--------------\n")
+            f.write(str(feed_dict) + "\n")
+            f.write("***************\n")
+            f.write(str(run_list) + "\n")
+            f.write("--------------\n")
 
         values = self.sess.run(run_list, feed_dict=feed_dict)
         run_out = dict(zip(run_list, values))
@@ -357,10 +364,11 @@ class PPOTrainer(Trainer):
                              self.model.old_value: np.array(_buffer['value_estimates'][start:end]).reshape([-1]),
                              self.model.advantage: np.array(_buffer['advantages'][start:end]).reshape([-1, 1]),
                              self.model.all_old_probs: np.array(
-                                 _buffer['action_probs'][start:end]).reshape([-1, self.env.get_action_space_size(self.brain_name)])}
+                                 _buffer['action_probs'][start:end]).reshape(
+                                                                [-1, self._get_action_space_size(self.brain_name)])}
                 if self.is_continuous:
                     feed_dict[self.model.epsilon] = np.array(
-                        _buffer['epsilons'][start:end]).reshape([-1, self.env.get_action_space_size(self.brain_name)])
+                        _buffer['epsilons'][start:end]).reshape([-1, self._get_action_space_size(self.brain_name)])
                 else:
                     feed_dict[self.model.action_holder] = np.array(
                         _buffer['actions'][start:end]).reshape([-1])
@@ -368,13 +376,15 @@ class PPOTrainer(Trainer):
                         feed_dict[self.model.prev_action] = np.array(
                             _buffer['prev_action'][start:end]).reshape([-1])
                 if self.use_states:
-                    if self.env.get_action_space_type(self.brain_name) == "continuous":
+                    if self._get_action_space_type(self.brain_name) == "continuous":
                         feed_dict[self.model.vector_in] = np.array(
                             _buffer['states'][start:end]).reshape(
-                            [-1, self.env.get_observation_space_size(self.brain_name) * self.env.get_num_stacked_observations(self.brain_name)])
+                            [-1, self._get_observation_space_size(self.brain_name) *
+                             self._get_num_stacked_observations(self.brain_name)])
                     else:
                         feed_dict[self.model.vector_in] = np.array(
-                            _buffer['states'][start:end]).reshape([-1, self.env.get_num_stacked_observations(self.brain_name)])
+                            _buffer['states'][start:end]).reshape([-1,
+                                                                   self._get_num_stacked_observations(self.brain_name)])
                 if self.use_observations:
                     for i, _ in enumerate(self.model.visual_in):
                         _obs = np.array(_buffer['observations%d' % i][start:end])
@@ -412,6 +422,26 @@ class PPOTrainer(Trainer):
             summary.value.add(tag='Info/Lesson', simple_value=lesson_number)
             self.summary_writer.add_summary(summary, steps)
             self.summary_writer.flush()
+
+    #@function_inspector
+    def _get_action_space_type(self, brain_name):
+        return self.env.get_action_space_type(brain_name)
+
+    #@function_inspector
+    def _get_action_space_size(self, brain_name):
+        return self.env.get_action_space_size(brain_name)
+
+    #@function_inspector
+    def _get_action_space_type(self, brain_name):
+        return self.env.get_action_space_type(brain_name)
+
+    #@function_inspector
+    def _get_observation_space_size(self, brain_name):
+        return self.env.get_observation_space_size(brain_name)
+
+    #@function_inspector
+    def _get_num_stacked_observations(self, brain_name):
+        return self.env.get_num_stacked_observations(brain_name)
 
 
 def discount_rewards(r, gamma=0.99, value_next=0.0):

@@ -1,19 +1,27 @@
 from abc import ABC, abstractmethod
 import os
-from copdaitrainers.running_environments import Simulator
+from copdaitrainers.parameters import Simulator
 from copdaitrainers.sensor_data_pb2 import Action
 import time
 import datetime
-
+import zmq
+from copdaitrainers.util import function_inspector
 
 class DataReader(object):
 
-    def __init__(self, env):
+    def __init__(self):
         self.env = env
+        #context = zmq.Context()
+        #socket = context.socket(zmq.REQ)
+        #self.socket.connect("tcp://localhost:5555")
 
+    @function_inspector
     def get_current_info(self):
         if type(self.env) is Simulator:
             # self.print_brain_info_data()
+            #self.socket.send(b"get_current_info")
+            #curr_info = self.socket.recv_pyobj()
+            #return curr_info
             return self.env.curr_info
         return []
 
@@ -39,12 +47,17 @@ class DataReader(object):
 
 class DataWriter(object):
 
-    def __init__(self, env):
+    def __init__(self):
         self.env = env
 
     def write_data(self, take_action_vector, take_action_memories, take_action_text):
         # TODO Write to zeromq the necessary data
-        self.serialize_data(take_action_vector)
+        #self.print_data(take_action_vector, take_action_memories, take_action_text)
+        actions = take_action_vector
+        if type(self.env) is Simulator:
+            actions = list(take_action_vector.values())[0][0]
+
+        #self.serialize_data(actions)
         if type(self.env) is Simulator:
             self.env.send_orders(take_action_vector, take_action_memories, take_action_text)
 
@@ -54,9 +67,18 @@ class DataWriter(object):
         action.torque = actions[1]
         now = time.time()
         action.time = now
-        file_name = 'data/actions/actions.raw'
-        with open(file_name, "ab") as f:
+        file_name = 'copdaitrainers/data/actions/actions.raw'
+        with open(file_name, "ab+") as f:
             f.write(action.SerializeToString())
-        file_name = 'data/actions/last_action.raw'
-        with open(file_name, "wb") as f:
+        file_name = 'copdaitrainers/data/actions/last_action.raw'
+        with open(file_name, "wb+") as f:
             f.write(action.SerializeToString())
+
+    def print_data(self, take_action_vector, take_action_memories, take_action_text):
+        print("----------------------------------")
+        print("take_action_vector : {}".format(take_action_vector))
+        print("**********************************")
+        print("take_action_memories : {}".format(take_action_memories))
+        print("**********************************")
+        print("take_action_text : {}".format(take_action_text))
+

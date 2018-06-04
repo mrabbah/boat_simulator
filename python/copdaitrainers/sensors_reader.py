@@ -4,8 +4,6 @@ import time
 import datetime
 import signal
 from copdaitrainers import sensor_data_pb2
-import zmq
-
 
 class ServiceExit(Exception):
     """
@@ -112,11 +110,11 @@ class SimulatorSensorsReader(SensorsReader, threading.Thread):
             iterator = iterator + 1
 
         data.time = now
-        file_name = 'data/sensors_data/data.raw'
+        file_name = 'copdaitrainers/data/sensors_data/data.raw'
         with open(file_name, "ab") as f:
             f.write(data.SerializeToString())
 
-        file_name = 'data/sensors_data/last_data.raw'
+        file_name = 'copdaitrainers/data/sensors_data/last_data.raw'
         with open(file_name, "wb") as f:
             f.write(data.SerializeToString())
 
@@ -147,3 +145,5 @@ class RcBoatSensorsReader(SensorsReader, threading.Thread):
 
     def serialize_data(self, observations):
         pass
+
+

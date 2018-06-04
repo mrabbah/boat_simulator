@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 from unityagents import UnityEnvironment, UnityEnvironmentException
 import os
+import zmq
+import logging
+from docopt import docopt
+import time
 
 
 class RunningEnvironment(ABC):
@@ -71,7 +75,7 @@ class RunningEnvironment(ABC):
 
     def factory(type, env_path, worker_id, curriculum_file, seed):
         if type == "SIMULATION": return Simulator(env_path, worker_id, curriculum_file, seed)
-        if type == "RCBOAT": return RcBoat()
+        # if type == "RCBOAT": return RcBoat()
         assert 0, "Bad shape creation: " + type
 
     factory = staticmethod(factory)
@@ -153,53 +157,74 @@ class Simulator(RunningEnvironment):
     def close(self):
         self.env.close()
 
-class RcBoat(RunningEnvironment):
 
-    def get_trainers_names(self):
-        return ["BoatBrain"]
+if __name__ == '__main__':
+    logger = logging.getLogger("copdai_env")
+    _USAGE = '''
+    Usage:
+      environments (<env>) [options]
+      environments --help
 
-    def _get_progress(self, trainers):
-        return None
+    Options:
+      --curriculum=<file>        Curriculum json file for environment [default: None].
+      --seed=<n>                 Random seed used for training [default: -1].
+      --slow                     Whether to run the game at training speed [default: False].
+      --worker-id=<n>            Number to add to communication port (5005). Used for multi-environment [default: 0].
+      --environment_type=<path>       The running environment  [default: SIMULATION].
+    '''
 
-    def set_lesson_number(self, ln):
-        pass
+    options = docopt(_USAGE)
+    logger.info(options)
 
-    def get_lesson_number(self):
-        pass
+    # General parameters
+    seed = int(options['--seed'])
 
-    def increment_lesson(self, trainers):
-        pass
+    if options['--environment_type'] == 'Empty':
+        environment_type = 'SIMULATION'
+    else:
+        environment_type = options['--environment_type']
 
-    def initialize(self, fast_simulation):
-        pass
+    env_path = options['<env>']
+    env_path = (env_path.strip()
+        .replace('.app', '')
+        .replace('.exe', '')
+        .replace('.x86_64', '')
+        .replace('.x86', ''))  # Strip out executable extensions if passed
+    worker_id = int(options['--worker-id'])
+    curriculum_file = str(options['--curriculum'])
+    if curriculum_file == "None":
+        curriculum_file = None
+    fast_simulation = not bool(options['--slow'])
 
-    def is_global_done(self):
-        # TODO Determine which robot reached the goal or not
-        return False
+    env = RunningEnvironment.factory(environment_type, env_path, worker_id, curriculum_file, seed)
 
-    def send_orders(self, orders, memories, action_text):
-        pass
+    env.initialize(fast_simulation)
 
-    def get_action_space_type(self, brain_name):
-        pass
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.bind("tcp://*:5555")
+    while True:
+        # Wait for next request from client
+        #message = socket.recv()
+        message = socket.recv_pyobj()
+        print("Received request: %s" % message)
+        request = message[0]
+        if request == "get_current_info":
+            socket.send_pyobj(env.curr_info)
+        elif request == "send_orders":
+            orders = message[1]
+            memories = message[2]
+            action_text = message[3]
+            env.send_orders(orders, memories, action_text)
+        elif request == "close":
+            env.close()
 
-    def get_number_visual_observations(self, brain_name):
-        pass
 
-    def get_observation_space_size(self, brain_name):
-        pass
+        # Do some work
+        #time.sleep(1)
 
-    def get_action_space_size(self, brain_name):
-        pass
-
-    def get_observation_space_type(self, brain_name):
-        pass
-
-    def get_num_stacked_observations(self, brain_name):
-        pass
-
-    def get_camera_resolutions(self, brain_name, camera_index):
-        pass
-
-    def close(self):
-        pass
+        # Send reply back to client
+        #socket.send(b"World")
+    env.close()
+    socket.close()
+    context.term()
