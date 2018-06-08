@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import os
-from copdaitrainers.parameters import Simulator
 from copdaitrainers.sensor_data_pb2 import Action
 import time
 import datetime
@@ -9,21 +8,23 @@ from copdaitrainers.util import function_inspector
 
 class DataReader(object):
 
-    def __init__(self):
-        self.env = env
-        #context = zmq.Context()
-        #socket = context.socket(zmq.REQ)
-        #self.socket.connect("tcp://localhost:5555")
+    def __init__(self, client):
+        self.client = client
 
-    @function_inspector
+    #@function_inspector
     def get_current_info(self):
+        '''
         if type(self.env) is Simulator:
             # self.print_brain_info_data()
             #self.socket.send(b"get_current_info")
             #curr_info = self.socket.recv_pyobj()
             #return curr_info
             return self.env.curr_info
-        return []
+        '''
+        self.client.send_pyobj(["get_current_info"])
+        curr_info = self.client.recv_pyobj()
+        return curr_info
+
 
     def print_brain_info_data(self):
         values = list(self.env.curr_info.values())
@@ -47,10 +48,11 @@ class DataReader(object):
 
 class DataWriter(object):
 
-    def __init__(self):
-        self.env = env
+    def __init__(self, client):
+        self.client = client
 
     def write_data(self, take_action_vector, take_action_memories, take_action_text):
+        '''
         # TODO Write to zeromq the necessary data
         #self.print_data(take_action_vector, take_action_memories, take_action_text)
         actions = take_action_vector
@@ -60,6 +62,10 @@ class DataWriter(object):
         #self.serialize_data(actions)
         if type(self.env) is Simulator:
             self.env.send_orders(take_action_vector, take_action_memories, take_action_text)
+        '''
+        self.client.send_pyobj(["send_orders", take_action_vector, take_action_memories, take_action_text])
+        message = self.client.recv_pyobj()
+        #print(message)
 
     def serialize_data(self, actions):
         action = Action()

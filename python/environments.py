@@ -158,6 +158,7 @@ class Simulator(RunningEnvironment):
         self.env.close()
 
 
+
 if __name__ == '__main__':
     logger = logging.getLogger("copdai_env")
     _USAGE = '''
@@ -202,29 +203,28 @@ if __name__ == '__main__':
 
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:5555")
-    while True:
-        # Wait for next request from client
-        #message = socket.recv()
-        message = socket.recv_pyobj()
-        print("Received request: %s" % message)
-        request = message[0]
-        if request == "get_current_info":
-            socket.send_pyobj(env.curr_info)
-        elif request == "send_orders":
-            orders = message[1]
-            memories = message[2]
-            action_text = message[3]
-            env.send_orders(orders, memories, action_text)
-        elif request == "close":
-            env.close()
+    socket.connect("tcp://localhost:5560")
 
-
-        # Do some work
-        #time.sleep(1)
-
-        # Send reply back to client
-        #socket.send(b"World")
-    env.close()
-    socket.close()
-    context.term()
+    try:
+        while True:
+            # Wait for next request from client
+            # message = socket.recv()
+            message = socket.recv_pyobj()
+            #print("Received request: %s" % message)
+            request = message[0]
+            if request == "get_current_info":
+                socket.send_pyobj(env.curr_info)
+            elif request == "send_orders":
+                orders = message[1]
+                memories = message[2]
+                action_text = message[3]
+                env.send_orders(orders, memories, action_text)
+                socket.send_pyobj("done")
+            elif request == "close":
+                env.close()
+    except Exception as e:
+        print(e)
+        env.close()
+    finally:
+        socket.close()
+        context.term()

@@ -18,7 +18,7 @@ import zmq
 from copdaitrainers.parameters import EnvironmentHyperParam
 from copdaitrainers.data_processing import DataReader
 from copdaitrainers.data_processing import DataWriter
-from  multiprocessing import Process
+from multiprocessing import Process
 from copdaitrainers import sensor_data_pb2
 from copdaitrainers.util import function_inspector
 
@@ -90,15 +90,15 @@ class TrainerController(object):
         tf.set_random_seed(self.seed)
         self.params = EnvironmentHyperParam.factory(environment, env_path, self.worker_id, self.curriculum_file, self.seed)
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
-        self.data_reader = DataReader()
-        self.data_writer = DataWriter()
-        '''
+
         #Init ZeroMq context
         self.context = zmq.Context()
+        '''
         #init publisher
         self.service_url = service_url
         self.publisher = self.context.socket(zmq.PUB)
         self.publisher.bind(service_url)
+        
         #init subscriber
         self.perception_url = perception_url
         self.perception_topic = perception_topic
@@ -108,6 +108,11 @@ class TrainerController(object):
 
         # string = socket.recv()
         '''
+        self.client = self.context.socket(zmq.REQ)
+        self.client.connect("tcp://localhost:5559")
+
+        self.data_reader = DataReader(self.client)
+        self.data_writer = DataWriter(self.client)
 
 
     def _process_graph(self):
@@ -186,11 +191,11 @@ class TrainerController(object):
             trainer_parameters_dict[brain_name] = trainer_parameters.copy()
         for brain_name in self._get_trainers_names():
             if trainer_parameters_dict[brain_name]['trainer'] == "imitation":
-                self.trainers[brain_name] = BehavioralCloningTrainer(sess, self.env, brain_name,
+                self.trainers[brain_name] = BehavioralCloningTrainer(sess, self.params, brain_name,
                                                                      trainer_parameters_dict[brain_name],
                                                                      self.train_model, self.seed)
             elif trainer_parameters_dict[brain_name]['trainer'] == "ppo":
-                self.trainers[brain_name] = PPOTrainer(sess, self.env, brain_name, trainer_parameters_dict[brain_name],
+                self.trainers[brain_name] = PPOTrainer(sess, self.params, brain_name, trainer_parameters_dict[brain_name],
                                                        self.train_model, self.seed)
             else:
                 raise Exception("The trainer config contains an unknown trainer type for brain {}"
@@ -301,33 +306,36 @@ class TrainerController(object):
         self.publisher.close()
         self.context.term()
         '''
+        self.client.close()
+        self.context.term()
         if self.train_model:
             self._export_graph()
 
     #@function_inspector
     def _get_trainers_names(self):
-        return self.env.get_trainers_names()
+        return self.params.get_trainers_names()
 
     #@function_inspector
     def _set_lesson_number(self, lesson):
-        self.env.set_lesson_number(lesson)
+        self.params.set_lesson_number(lesson)
 
     #@function_inspector
     def _increment_lesson(self, trainers):
-        self.env.increment_lesson(trainers)
+        self.params.increment_lesson(trainers)
 
     #@function_inspector
     def _initialize(self, fast_simulation):
-        self.env.initialize(fast_simulation)
+        self.params.initialize(fast_simulation)
 
     #@function_inspector
     def _is_global_done(self):
-        return self.env.is_global_done()
+        return self.params.is_global_done()
 
     #@function_inspector
     def _get_lesson_number(self):
-        return self.env.get_lesson_number()
+        return self.params.get_lesson_number()
 
     #@function_inspector
     def _close(self):
-        self.env.close()
+        self.client.send_pyobj(["close"])
+        #self.env.close()

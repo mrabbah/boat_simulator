@@ -13,7 +13,7 @@ from copdaitrainers.bc.models import BehavioralCloningModel
 from copdaitrainers.buffer import Buffer
 from copdaitrainers.trainer import UnityTrainerException, Trainer
 
-logger = logging.getLogger("unityagents")
+logger = logging.getLogger("copdaibrain")
 
 
 class BehavioralCloningTrainer(Trainer):

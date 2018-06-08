@@ -14,17 +14,17 @@ from copdaitrainers.ppo.models import PPOModel
 from copdaitrainers.trainer import UnityTrainerException, Trainer
 from copdaitrainers.util import function_inspector
 
-logger = logging.getLogger("unityagents")
+logger = logging.getLogger("copdaibrain")
 
 
 class PPOTrainer(Trainer):
     """The PPOTrainer is an implementation of the PPO algorythm."""
 
-    def __init__(self, sess, env, brain_name, trainer_parameters, training, seed):
+    def __init__(self, sess, params, brain_name, trainer_parameters, training, seed):
         """
         Responsible for collecting experiences and training PPO model.
         :param sess: Tensorflow session.
-        :param env: The Running Environment.
+        :param params: The Environment parameters.
         :param  trainer_parameters: The parameters for the trainer (dictionary).
         :param training: Whether the trainer is set for training.
         """
@@ -39,7 +39,7 @@ class PPOTrainer(Trainer):
                 raise UnityTrainerException("The hyperparameter {0} could not be found for the PPO trainer of "
                                             "brain {1}.".format(k, brain_name))
 
-        super(PPOTrainer, self).__init__(sess, env, brain_name, trainer_parameters, training)
+        super(PPOTrainer, self).__init__(sess, params, brain_name, trainer_parameters, training)
 
         self.use_recurrent = trainer_parameters["use_recurrent"]
         self.sequence_length = 1
@@ -58,7 +58,7 @@ class PPOTrainer(Trainer):
         self.variable_scope = trainer_parameters['graph_scope']
         with tf.variable_scope(self.variable_scope):
             tf.set_random_seed(seed)
-            self.model = PPOModel(env, brain_name,
+            self.model = PPOModel(params, brain_name,
                                   lr=float(trainer_parameters['learning_rate']),
                                   h_size=int(trainer_parameters['hidden_units']),
                                   epsilon=float(trainer_parameters['epsilon']),
@@ -76,9 +76,9 @@ class PPOTrainer(Trainer):
         self.training_buffer = Buffer()
         self.cumulative_rewards = {}
         self.episode_steps = {}
-        self.is_continuous = (env.get_action_space_type(brain_name) == "continuous")
-        self.use_observations = (env.get_number_visual_observations(brain_name) > 0)
-        self.use_states = (env.get_observation_space_size(brain_name) > 0)
+        self.is_continuous = (params.get_action_space_type(brain_name) == "continuous")
+        self.use_observations = (params.get_number_visual_observations(brain_name) > 0)
+        self.use_states = (params.get_observation_space_size(brain_name) > 0)
         self.summary_path = trainer_parameters['summary_path']
         if not os.path.exists(self.summary_path):
             os.makedirs(self.summary_path)
@@ -425,23 +425,23 @@ class PPOTrainer(Trainer):
 
     #@function_inspector
     def _get_action_space_type(self, brain_name):
-        return self.env.get_action_space_type(brain_name)
+        return self.params.get_action_space_type(brain_name)
 
     #@function_inspector
     def _get_action_space_size(self, brain_name):
-        return self.env.get_action_space_size(brain_name)
+        return self.params.get_action_space_size(brain_name)
 
     #@function_inspector
     def _get_action_space_type(self, brain_name):
-        return self.env.get_action_space_type(brain_name)
+        return self.params.get_action_space_type(brain_name)
 
     #@function_inspector
     def _get_observation_space_size(self, brain_name):
-        return self.env.get_observation_space_size(brain_name)
+        return self.params.get_observation_space_size(brain_name)
 
     #@function_inspector
     def _get_num_stacked_observations(self, brain_name):
-        return self.env.get_num_stacked_observations(brain_name)
+        return self.params.get_num_stacked_observations(brain_name)
 
 
 def discount_rewards(r, gamma=0.99, value_next=0.0):

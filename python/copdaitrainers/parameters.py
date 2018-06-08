@@ -84,7 +84,7 @@ class EnvironmentHyperParam(ABC):
 
 class SimulatorHyperParam(EnvironmentHyperParam):
 
-    @function_inspector
+    #@function_inspector
     def initialize(self, fast_simulation):
         self.fast_simulation = fast_simulation
         #self.curr_info = self.env.reset(train_mode=self.fast_simulation)
@@ -96,19 +96,22 @@ class SimulatorHyperParam(EnvironmentHyperParam):
         #self.env = UnityEnvironment(file_name=env_path, worker_id=self.worker_id,
         #                            curriculum=self.curriculum_file, seed=self.seed)
         self.external_brain_names = ["BoatBrain"]
-        #self.mode = {}  # Dictionary of brain name and their mode
+        self.mode = {}  # Dictionary of brain name and their mode
         self.mode["BoatBrain"] = "continuous"  # can be either "continuous" or "discrete"
-        #self.number_visual_observations = {}
+        self.number_visual_observations = {}
         self.number_visual_observations["BoatBrain"] = 0
+        self.observation_space_size = {}
         self.observation_space_size["BoatBrain"] = 6
+        self.action_space_size = {}
         self.action_space_size["BoatBrain"] = 2
+        self.num_stacked_observations = {}
         self.num_stacked_observations["BoatBrain"] = 10
         self.camera_resolutions = {}
         self.measure_type = ""  # can be either "progress" or "reward" or ""
         self.env_name = os.path.basename(os.path.normpath(env_path))  # Extract out name of environment
         self.curr_info = None
 
-    @function_inspector
+    #@function_inspector
     def _get_progress(self, trainers):
         if self.curriculum_file is not None:
             progress = 0
@@ -125,68 +128,68 @@ class SimulatorHyperParam(EnvironmentHyperParam):
         else:
             return None
 
-    @function_inspector
+    #@function_inspector
     def get_trainers_names(self):
         # return self.env.external_brain_names
         return self.external_brain_names
 
-    @function_inspector
+    #@function_inspector
     def set_lesson_number(self, ln):
         # self.env.curriculum.set_lesson_number(ln)
         pass
 
-    @function_inspector
+    #@function_inspector
     def get_lesson_number(self):
         # return self.env.curriculum.lesson_number
         pass
 
-    @function_inspector
+    #@function_inspector
     def increment_lesson(self, trainers):
         # self.env.curriculum.increment_lesson(self._get_progress(trainers))
         # self.env.curriculum.increment_lesson(None)
         pass
 
-    @function_inspector
+    #@function_inspector
     def is_global_done(self):
         # return self.env.global_done
         return False
 
-    @function_inspector
+    #@function_inspector
     def send_orders(self, orders, memories, action_text):
         self.curr_info = self.env.step(vector_action=orders, memory=memories,
                                        text_action=action_text)
 
-    @function_inspector
+    #@function_inspector
     def get_action_space_type(self, brain_name):
         # return self.env.brains[brain_name].vector_action_space_type
         return self.mode[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_observation_space_type(self, brain_name):
         # return self.env.brains[brain_name].vector_observation_space_type
         return self.mode[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_number_visual_observations(self, brain_name):
         # return self.env.brains[brain_name].number_visual_observations
         return self.number_visual_observations[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_observation_space_size(self, brain_name):
         # return self.env.brains[brain_name].vector_observation_space_size
         return self.observation_space_size[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_action_space_size(self, brain_name):
         # return self.env.brains[brain_name].vector_action_space_size
         return self.action_space_size[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_num_stacked_observations(self, brain_name):
         # return self.env.brains[brain_name].num_stacked_vector_observations
         return self.num_stacked_observations[brain_name]
 
-    @function_inspector
+    #@function_inspector
     def get_camera_resolutions(self, brain_name, camera_index):
         '''
         return [self.env.brains[brain_name].camera_resolutions[camera_index]['height'],
@@ -197,7 +200,7 @@ class SimulatorHyperParam(EnvironmentHyperParam):
                 self.camera_resolutions[brain_name][camera_index]['width'],
                 self.camera_resolutions[brain_name][camera_index]['blackAndWhite']]
 
-    @function_inspector
+    #@function_inspector
     def close(self):
         self.env.close()
 

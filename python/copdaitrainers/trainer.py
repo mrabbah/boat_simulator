@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from unityagents import UnityException, AllBrainInfo
 
-logger = logging.getLogger("unityagents")
+logger = logging.getLogger("copdaibrain")
 
 
 class UnityTrainerException(UnityException):
@@ -18,16 +18,16 @@ class UnityTrainerException(UnityException):
 class Trainer(object):
     """This class is the abstract class for the unitytrainers"""
 
-    def __init__(self, sess, env, brain_name, trainer_parameters, training):
+    def __init__(self, sess, params, brain_name, trainer_parameters, training):
         """
         Responsible for collecting experiences and training a neural network model.
         :param sess: Tensorflow session.
-        :param env: The Running Environment.
+        :param params: The Environment parameters.
         :param  trainer_parameters: The parameters for the trainer (dictionary).
         :param training: Whether the trainer is set for training.
         """
         self.brain_name = brain_name
-        self.env = env
+        self.params = params
         # self.brain = env.brains[self.brain_name]
         self.trainer_parameters = trainer_parameters
         self.is_training = training

@@ -41,7 +41,7 @@ class BrainParameters:
         self.vector_observation_space_type = ["discrete", "continuous"][brain_param["vectorObservationSpaceType"]]
 
     def __str__(self):
-        return '''Unity brain name: {0}
+        return '''brain name: {0}
         Number of Visual Observations (per agent): {1}
         Vector Observation space type: {2}
         Vector Observation space size (per agent): {3}
