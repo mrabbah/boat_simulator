@@ -204,7 +204,7 @@ if __name__ == '__main__':
 
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.bind("tcp://*:5560")
+    socket.bind("ipc:///tmp/sim.pipe")
 
     try:
         while True:

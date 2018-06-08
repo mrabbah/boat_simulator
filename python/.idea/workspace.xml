@@ -18,7 +18,7 @@
         <entry file="file://$PROJECT_DIR$/copdaitrainers/trainer_controller.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="414">
-              <caret line="111" column="49" lean-forward="false" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
+              <caret line="111" column="48" lean-forward="false" selection-start-line="111" selection-start-column="48" selection-end-line="111" selection-end-column="48" />
               <folding>
                 <element signature="e#117#131#0" expanded="true" />
               </folding>
@@ -60,7 +60,7 @@
         <entry file="file://$PROJECT_DIR$/environments.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="382">
-              <caret line="206" column="29" lean-forward="false" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="29" />
+              <caret line="206" column="36" lean-forward="true" selection-start-line="206" selection-start-column="17" selection-end-line="206" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -805,14 +805,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/environments.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="382">
-          <caret line="206" column="29" lean-forward="false" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/copdaitrainers/data_processing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="386">
@@ -823,10 +815,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/environments.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="382">
+          <caret line="206" column="36" lean-forward="true" selection-start-line="206" selection-start-column="17" selection-end-line="206" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/copdaitrainers/trainer_controller.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
-          <caret line="111" column="49" lean-forward="false" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
+          <caret line="111" column="48" lean-forward="false" selection-start-line="111" selection-start-column="48" selection-end-line="111" selection-end-column="48" />
           <folding>
             <element signature="e#117#131#0" expanded="true" />
           </folding>
