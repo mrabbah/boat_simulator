@@ -2,17 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6181a752-769e-4a6a-9cac-cef761849b30" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/bc/trainer.py" afterPath="$PROJECT_DIR$/copdaitrainers/bc/trainer.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/data_processing.py" afterPath="$PROJECT_DIR$/copdaitrainers/data_processing.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/models.py" afterPath="$PROJECT_DIR$/copdaitrainers/models.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/parameters.py" afterPath="$PROJECT_DIR$/copdaitrainers/parameters.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/ppo/models.py" afterPath="$PROJECT_DIR$/copdaitrainers/ppo/models.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/ppo/trainer.py" afterPath="$PROJECT_DIR$/copdaitrainers/ppo/trainer.py" />
-      <change beforePath="$PROJECT_DIR$/copdaitrainers/trainer.py" afterPath="$PROJECT_DIR$/copdaitrainers/trainer.py" />
       <change beforePath="$PROJECT_DIR$/copdaitrainers/trainer_controller.py" afterPath="$PROJECT_DIR$/copdaitrainers/trainer_controller.py" />
       <change beforePath="$PROJECT_DIR$/environments.py" afterPath="$PROJECT_DIR$/environments.py" />
-      <change beforePath="$PROJECT_DIR$/unityagents/brain.py" afterPath="$PROJECT_DIR$/unityagents/brain.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,11 +14,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="trainer_controller.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="trainer_controller.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/copdaitrainers/trainer_controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="468">
-              <caret line="114" column="35" lean-forward="false" selection-start-line="114" selection-start-column="35" selection-end-line="114" selection-end-column="35" />
+            <state relative-caret-position="414">
+              <caret line="111" column="49" lean-forward="false" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
               <folding>
                 <element signature="e#117#131#0" expanded="true" />
               </folding>
@@ -65,11 +56,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="environments.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="environments.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/environments.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="386">
-              <caret line="212" column="13" lean-forward="false" selection-start-line="212" selection-start-column="13" selection-end-line="212" selection-end-column="13" />
+            <state relative-caret-position="382">
+              <caret line="206" column="29" lean-forward="false" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -194,12 +185,12 @@
         <option value="$PROJECT_DIR$/copdaitrainers/trainer.py" />
         <option value="$PROJECT_DIR$/copdaitrainers/models.py" />
         <option value="$PROJECT_DIR$/copdaitrainers/parameters.py" />
-        <option value="$PROJECT_DIR$/copdaitrainers/trainer_controller.py" />
         <option value="$PROJECT_DIR$/unityagents/environment.py" />
         <option value="$PROJECT_DIR$/unityagents/brain.py" />
         <option value="$PROJECT_DIR$/queue_device.py" />
         <option value="$PROJECT_DIR$/copdaitrainers/data_processing.py" />
         <option value="$PROJECT_DIR$/environments.py" />
+        <option value="$PROJECT_DIR$/copdaitrainers/trainer_controller.py" />
       </list>
     </option>
   </component>
@@ -814,13 +805,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/copdaitrainers/trainer_controller.py">
+    <entry file="file://$PROJECT_DIR$/environments.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="114" column="35" lean-forward="false" selection-start-line="114" selection-start-column="35" selection-end-line="114" selection-end-column="35" />
-          <folding>
-            <element signature="e#117#131#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="382">
+          <caret line="206" column="29" lean-forward="false" selection-start-line="206" selection-start-column="25" selection-end-line="206" selection-end-column="29" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -834,11 +823,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/environments.py">
+    <entry file="file://$PROJECT_DIR$/copdaitrainers/trainer_controller.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="386">
-          <caret line="212" column="13" lean-forward="false" selection-start-line="212" selection-start-column="13" selection-end-line="212" selection-end-column="13" />
-          <folding />
+        <state relative-caret-position="414">
+          <caret line="111" column="49" lean-forward="false" selection-start-line="111" selection-start-column="49" selection-end-line="111" selection-end-column="49" />
+          <folding>
+            <element signature="e#117#131#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

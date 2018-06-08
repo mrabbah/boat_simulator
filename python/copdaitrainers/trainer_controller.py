@@ -109,7 +109,7 @@ class TrainerController(object):
         # string = socket.recv()
         '''
         self.client = self.context.socket(zmq.REQ)
-        self.client.connect("tcp://localhost:5559")
+        self.client.connect("tcp://localhost:5560")
 
         self.data_reader = DataReader(self.client)
         self.data_writer = DataWriter(self.client)

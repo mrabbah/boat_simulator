@@ -197,13 +197,14 @@ if __name__ == '__main__':
         curriculum_file = None
     fast_simulation = not bool(options['--slow'])
 
-    env = RunningEnvironment.factory(environment_type, env_path, worker_id, curriculum_file, seed)
+    env = RunningEnvironment.factory(environment_type, env_path, worker_id,
+                                     curriculum_file, seed)
 
     env.initialize(fast_simulation)
 
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.connect("tcp://localhost:5560")
+    socket.bind("tcp://*:5560")
 
     try:
         while True:
