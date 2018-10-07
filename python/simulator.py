@@ -6,82 +6,7 @@ import logging
 from docopt import docopt
 import time
 
-
-class RunningEnvironment(ABC):
-
-    @abstractmethod
-    def _get_progress(self, trainers):
-        pass
-
-    @abstractmethod
-    def get_trainers_names(self):
-        pass
-
-    @abstractmethod
-    def set_lesson_number(self, ln):
-        pass
-
-    @abstractmethod
-    def increment_lesson(self, trainers):
-        pass
-
-    @abstractmethod
-    def get_lesson_number(self):
-        pass
-
-    @abstractmethod
-    def initialize(self, fast_simulation):
-        pass
-
-    @abstractmethod
-    def is_global_done(self):
-        pass
-
-    @abstractmethod
-    def send_orders(self, orders, memories, action_text):
-        pass
-
-    @abstractmethod
-    def get_action_space_type(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_number_visual_observations(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_observation_space_size(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_action_space_size(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_num_stacked_observations(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_observation_space_type(self, brain_name):
-        pass
-
-    @abstractmethod
-    def get_camera_resolutions(self, brain_name, camera_index):
-        pass
-
-    @abstractmethod
-    def close(self):
-        pass
-
-    def factory(type, env_path, worker_id, curriculum_file, seed):
-        if type == "SIMULATION": return Simulator(env_path, worker_id, curriculum_file, seed)
-        # if type == "RCBOAT": return RcBoat()
-        assert 0, "Bad shape creation: " + type
-
-    factory = staticmethod(factory)
-
-
-class Simulator(RunningEnvironment):
+class Simulator(object):
 
     def initialize(self, fast_simulation):
         self.fast_simulation = fast_simulation
@@ -197,8 +122,7 @@ if __name__ == '__main__':
         curriculum_file = None
     fast_simulation = not bool(options['--slow'])
 
-    env = RunningEnvironment.factory(environment_type, env_path, worker_id,
-                                     curriculum_file, seed)
+    env = Simulator(env_path, worker_id, curriculum_file, seed)
 
     env.initialize(fast_simulation)
 

@@ -4,6 +4,8 @@ import time
 import datetime
 import signal
 from copdaitrainers import sensor_data_pb2
+import zmq
+from  multiprocessing import Process
 
 class ServiceExit(Exception):
     """
@@ -13,80 +15,87 @@ class ServiceExit(Exception):
     pass
 
 
-class SensorsOrchestrator(object):
-
-    def __init__(self, type, env, sensing_delay, brain_name):
-        self.sensor_reader = SensorsReader.factory(type, env, sensing_delay, brain_name)
-        # Register the signal handlers
-        signal.signal(signal.SIGTERM, self.service_shutdown)
-        signal.signal(signal.SIGINT, self.service_shutdown)
-
-    def service_shutdown(self, signum, frame):
-        self.sensor_reader.shutdown_flag.set()
-        self.sensor_reader.join()
-
-    def start_sensing(self):
-        if self.sensor_reader.stopped():
-            self.sensor_reader.setDaemon(True)
-            self.sensor_reader.start()
-            self.sensor_reader.join()
-
-    def stop_sensing(self):
-        if not self.sensor_reader.stopped():
-            self.sensor_reader.shutdown_flag.set()
-            self.sensor_reader.join()
-
-
 class SensorsReader(ABC):
 
-    @abstractmethod
-    def stop(self):
-        pass
+    def __init__(self):
+        self.paused = False
+        self.stop_running = False
 
-    @abstractmethod
+    def run(self):
+        p_camera = Process(target=self.read_camera, args=()).start()
+        p_gyroscope = Process(target=self.read_gyroscope, args=()).start()
+        p_location = Process(target=self.read_position, args=()).start()
+        while not self.stop_running:
+            time.sleep(1)
+        p_camera.kill()
+        p_gyroscope.kill()
+        p_location.kill()
+
+    def stop(self):
+        self.stop_running = True
+
     def stopped(self):
-        pass
+        return self.stop_running
 
     @abstractmethod
     def serialize_data(self, observations):
         pass
 
-    def factory(type, env, sensing_delay, brain_name):
-        if type == "SIMULATION": return SimulatorSensorsReader(env=env, name='sim_sensor_reader',
-                                                               sensing_delay=sensing_delay, brain_name=brain_name)
-        if type == "RCBOAT": return RcBoatSensorsReader(env=env, name='rc_boat_sensor_reader',
-                                                        sensing_delay=sensing_delay, brain_name=brain_name)
+    @abstractmethod
+    def read_position(self):
+        pass
+
+    @abstractmethod
+    def read_gyroscope(self):
+        pass
+
+    @abstractmethod
+    def read_camera(self):
+        pass
+
+    def factory(type):
+        if type == "SIMULATION": return SimulatorSensorsReader()
+        if type == "RCBOAT": return RcBoatSensorsReader()
         assert 0, "Bad Sensor type creation: " + type
 
     factory = staticmethod(factory)
 
 
-class SimulatorSensorsReader(SensorsReader, threading.Thread):
+class SimulatorSensorsReader(SensorsReader):
 
-    def __init__(self, env, sensing_delay, brain_name, group=None, target=None, name=None,
-                 args=(), kwargs=None, verbose=None):
-        threading.Thread.__init__(self, group=group, target=target, name=name,
-                                  verbose=verbose)
+    def __init__(self):
+        super().__init__(self)
 
-        self.env = env
-        self.brain_name = brain_name
-        self.args = args
-        self.kwargs = kwargs
-        self.shutdown_flag = threading.Event()
-        self.sensing_delay = sensing_delay
 
-    def stop(self):
-        self._stop_event.set()
+    def read_camera(self):
+        while not self.stop_running:
+            time.sleep(10)
 
-    def stopped(self):
-        return self._stop_event.is_set()
+    def read_gyroscope(self):
+        context = zmq.Context()
+        client = context.socket(zmq.REQ)
+        client.connect("ipc:///tmp/sim.pipe")
+        publisher = context.socket(zmq.PUB)
+        publisher.bind("ipc:///tmp/gyroscope.pipe")
+        while True:
+            client.send_pyobj(["get_current_info"])
+            curr_info = client.recv_pyobj()
+            publisher.send_pyobj(curr_info)
+        client.close()
+        context.term()
 
-    def run(self):
-        while not self.shutdown_flag.is_set():
-            values = list(self.env.curr_info.values())
-            brain_info = values[0]
-            self.serialize_data(brain_info.vector_observations[0])
-            time.sleep(self.sensing_delay)
+    def read_position(self):
+        context = zmq.Context()
+        client = context.socket(zmq.REQ)
+        client.connect("ipc:///tmp/sim.pipe")
+        publisher = context.socket(zmq.PUB)
+        publisher.bind("ipc:///tmp/position.pipe")
+        while True:
+            client.send_pyobj(["get_current_info"])
+            curr_info = client.recv_pyobj()
+            publisher.send_pyobj(curr_info)
+        client.close()
+        context.term()
 
     def serialize_data(self, observations):
         num_stacked_observations = self.env.get_num_stacked_observations(self.brain_name)
@@ -120,28 +129,6 @@ class SimulatorSensorsReader(SensorsReader, threading.Thread):
 
 
 class RcBoatSensorsReader(SensorsReader, threading.Thread):
-
-    def __init__(self, env, sensing_delay, brain_name, group=None, target=None, name=None,
-                 args=(), kwargs=None, verbose=None):
-        threading.Thread.__init__(self, group=group, target=target, name=name,
-                                  verbose=verbose)
-
-        self.env = env
-        self.brain_name = brain_name
-        self.args = args
-        self.kwargs = kwargs
-        self.shutdown_flag = threading.Event()
-        self.sensing_delay = sensing_delay
-
-    def stop(self):
-        self._stop_event.set()
-
-    def stopped(self):
-        return self._stop_event.is_set()
-
-    def run(self):
-        while not self.shutdown_flag.is_set():
-            time.sleep(self.sensing_delay)
 
     def serialize_data(self, observations):
         pass
