@@ -1,6 +1,22 @@
-Base path: /Applications/Unity/Unity.app/Contents
+Base path: /home/mrabbah/Unity-2018.1.0b13/Editor/Data
 Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
-Cmd: initializeCompiler
+Cmd: preprocess
+  insize=42476 outsize=3020 ok=1
+Cmd: preprocess
+  insize=317 outsize=314 ok=1
+Cmd: preprocess
+  insize=6136 outsize=1236 ok=1
+Cmd: preprocess
+  insize=4468 outsize=1077 ok=1
+Cmd: preprocess
+  insize=4260 outsize=979 ok=1
+Cmd: preprocess
+  insize=5740 outsize=1369 ok=1
+Cmd: preprocess
+  insize=7651 outsize=1426 ok=1
+Cmd: preprocess
+  insize=5018 outsize=1087 ok=1
+Cmd: preprocess
+  insize=6442 outsize=1340 ok=1
+Cmd: preprocess
+  insize=5609 outsize=1315 ok=1
