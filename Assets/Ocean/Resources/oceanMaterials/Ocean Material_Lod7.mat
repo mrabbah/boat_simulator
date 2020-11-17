@@ -4,11 +4,12 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: Ocean Material_Lod7
   m_Shader: {fileID: 4800000, guid: 7e44d417df9bfd4459ea4a38c4f3a14e, type: 3}
-  m_ShaderKeywords: DCON FOGON SHORE_ON
+  m_ShaderKeywords: DCON FOGON SHORE_OFF
   m_LightmapFlags: 5
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -79,15 +80,15 @@ Material:
     - _BlendA: -0.6632021
     - _BlendB: -0.7484403
     - _DistanceCancellation: 2000
-    - _FoamFactor: 0.81
+    - _FoamFactor: 0.73
     - _FoamSize: 1
     - _Shininess: 0.7665094
-    - _ShoreDistance: 10.3
+    - _ShoreDistance: 4
     - _ShoreStrength: 1.5
-    - _Size: 0.03125
-    - _SpecPower: 0.667
-    - _Specularity: 1.56
-    - _Translucency: 0.7
+    - _Size: 0.015625
+    - _SpecPower: 0.271
+    - _Specularity: 6.71
+    - _Translucency: 1
     - _WaterLod1Alpha: 1
     - _WaveOffset: -63.01681
     m_Colors:
@@ -97,10 +98,10 @@ Material:
     - _Size: {r: 512, g: 30, b: 512, a: 0}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 1}
     - _SunColor: {r: 0.9705882, g: 0.94341964, b: 0.8849481, a: 1}
-    - _SunDir: {r: 0.8974043, g: -0.440096, b: 0.031320572, a: 0}
-    - _SurfaceColor: {r: 0.6905277, g: 0.72140557, b: 0.75735295, a: 1}
+    - _SunDir: {r: 0.6003333, g: -0.7994753, b: 0.02096337, a: 0}
+    - _SurfaceColor: {r: 0.67165875, g: 0.77920663, b: 0.9044118, a: 1}
     - _SurfaceColorLod1: {r: 0.49545845, g: 0.8381487, b: 0.85294116, a: 1}
-    - _WaterColor: {r: 0.5364403, g: 0.8604701, b: 0.8897059, a: 1}
+    - _WaterColor: {r: 0.07309689, g: 0.15208803, b: 0.19117647, a: 1}
     - _WaterColorLod1: {r: 0.046009947, g: 0.1691676, b: 0.27205884, a: 1}
     - _WaveOffset: {r: -87.81002, g: -87.81002, b: -87.81002, a: -87.81002}
 --- !u!1002 &2100001
